@@ -36,6 +36,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
@@ -84,13 +85,14 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     }
     
     /**
-     * @see WorkspaceUploadReferenceHandler#matchReferencesWithNodes(int,
-     * java.util.Collection, nl.mpi.lamus.workspace.model.WorkspaceNode,
-     * nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Collection) 
+     * @see WorkspaceUploadReferenceHandler#matchReferencesWithNodes(
+     *  nl.mpi.lamus.workspace.model.Workspace, java.util.Collection,
+     *  nl.mpi.lamus.workspace.model.WorkspaceNode,
+     *  nl.mpi.metadata.api.model.ReferencingMetadataDocument, java.util.Map)
      */
     @Override
     public Collection<ImportProblem> matchReferencesWithNodes(
-            int workspaceID, Collection<WorkspaceNode> nodesToCheck,
+            Workspace workspace, Collection<WorkspaceNode> nodesToCheck,
             WorkspaceNode currentNode, ReferencingMetadataDocument currentDocument,
             Map<MetadataDocument, WorkspaceNode> documentsWithInvalidSelfHandles) {
         
@@ -101,7 +103,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         //check if document has external self-handle
         URI currentSelfHandle = metadataApiBridge.getSelfHandleFromDocument(currentDocument);
         
-        if(!handleParser.isHandleUriWithKnownPrefix(currentSelfHandle)) {
+        if(currentSelfHandle != null && !handleParser.isHandleUriWithKnownPrefix(currentSelfHandle)) {
             documentsWithInvalidSelfHandles.put(currentDocument, currentNode);
         }
         
@@ -143,7 +145,14 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     logger.debug("Match not found yet. Trying to find it using handle " + refURI);
                     
                     URI preparedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(refURI);
-                    matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspaceID, nodesToCheck, preparedHandle);
+                    try {
+                        matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspace, nodesToCheck, preparedHandle);
+                    } catch(IllegalStateException ex) {
+                        removeReference(currentDocument, ref, currentNode);
+                        logger.error(ex.getMessage());
+                        failedLinks.add(new MatchImportProblem(currentNode, ref, ex.getMessage(), null));
+                        continue;
+                    }
                     
                     if(matchedNode != null) {
                         //set handle in DB
@@ -167,7 +176,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     
                     logger.debug("Match not found yet. Trying to find external match for URI " + refURI);
                     
-                    matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspaceID, refURI);
+                    matchedNode = workspaceUploadNodeMatcher.findExternalNodeForUri(workspace, refURI);
                     if(matchedNode != null) {
                         externalNode = true;
                     }
@@ -186,7 +195,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 Collection<WorkspaceNode> alreadyLinkedParents = workspaceDao.getParentWorkspaceNodes(matchedNode.getWorkspaceNodeID());
                 
                 if(alreadyLinkedParents.isEmpty()) {
-                    linkNodes(currentNode, matchedNode, workspaceID, failedLinks);
+                    linkNodes(currentNode, matchedNode, workspace.getWorkspaceID(), failedLinks);
                 } else {
                     
                     boolean sameParent = true;
@@ -210,7 +219,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                         logger.error(message);
                         failedLinks.add(new LinkImportProblem(currentNode, matchedNode, message, null));
                     } else {
-                        linkNodes(currentNode, matchedNode, workspaceID, failedLinks);
+                        linkNodes(currentNode, matchedNode, workspace.getWorkspaceID(), failedLinks);
                     }
                 }
                 

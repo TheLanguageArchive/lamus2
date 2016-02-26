@@ -39,6 +39,7 @@ import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -86,6 +87,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
     
+    @Mock Workspace mockWorkspace;
     @Mock ReferencingMetadataDocument mockMetadataDocument;
     @Mock WorkspaceNode mockFirstNode;
     @Mock WorkspaceNode mockSecondNode;
@@ -144,7 +146,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                    mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -192,7 +194,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                    mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -244,7 +246,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                    mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -289,7 +291,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                    mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -339,7 +341,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                    mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should have one entry", documentsWithExternalSelfHandles.size() == 1);
@@ -388,7 +390,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -437,7 +439,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -474,7 +476,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithLocalUriButNoMatchThere_WithHandle_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, Boolean.TRUE, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
+        reference_WithLocalUriButNoMatchThere_WithHandle_MatchesNode(mockFirstReference, mockSecondNode, firstRefLocalUri, Boolean.TRUE, Boolean.FALSE, firstRefURI, nodesToCheck, mockWorkspace);
         
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode,
@@ -485,7 +487,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
 
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection of failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -538,7 +540,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
@@ -596,7 +598,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -632,7 +634,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode,
                 secondNodeURL, null, null, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
@@ -645,7 +647,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -682,7 +684,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.FALSE, mockSecondNode,
                 secondNodeURL, null, null, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
@@ -695,7 +697,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -729,21 +731,69 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.TRUE, Boolean.TRUE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.TRUE, Boolean.TRUE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, null);
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
     }
     
     @Test
-    public void matchOneReference_WithoutLocalUrl_WithUri() throws WorkspaceException, MalformedURLException, IOException, TransformerException, MetadataException, URISyntaxException {
+    public void matchOneReference_WithoutLocalUrl_WithHandleCausingIllegalStateException() throws MetadataException, IOException, TransformerException, WorkspaceException {
+        
+        final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        //URI is a handle
+        final String firstRefRawHandle = UUID.randomUUID().toString();
+        final URI firstRefURI = URI.create("11142" + firstRefRawHandle);
+        final URI completeFirstRefURI = URI.create("hdl:11142/" + firstRefRawHandle);
+        
+        final URI firstDocumentLocation = URI.create("file:/workspaces/" + workspaceID + "/upload/parent.cmdi");
+        final File firstDocumentLocationFile = new File(firstDocumentLocation.getPath());
+        
+        final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
+        nodesToCheck.add(mockFirstNode);
+        nodesToCheck.add(mockSecondNode);
+        
+        final List<Reference> references = new ArrayList<>();
+        references.add(mockFirstReference);
+        
+        final Collection<WorkspaceNode> existingParents = new ArrayList<>();
+        
+        final Map<MetadataDocument, WorkspaceNode> documentsWithExternalSelfHandles = new HashMap<>();
+        
+        IllegalStateException expectedException = new IllegalStateException("handle pointing to top node or something");
+        
+        
+        initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
+        //loop over references
+        reference_IsNotAPage(mockFirstReference, firstRefURI);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, expectedException);
+        
+        removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
+        
+        Collection<ImportProblem> failedLinks =
+                workspaceUploadReferenceHandler.matchReferencesWithNodes(
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+        
+        assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
+        assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
+        assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
+        
+        ImportProblem problem = failedLinks.iterator().next();
+        assertTrue("Upload problem different from expected", problem instanceof MatchImportProblem);
+        assertEquals("Upload problem has different parent node from expected", mockFirstNode, ((MatchImportProblem) problem).getParentNode());
+        assertEquals("Upload problem has different child node from expected", mockFirstReference, ((MatchImportProblem) problem).getChildReference());
+    }
+    
+    @Test
+    public void matchOneReference_WithoutLocalUrl_WithIllegalHandle() throws WorkspaceException, MalformedURLException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI parentDocumentHandle = URI.create("hdl:11142/" + UUID.randomUUID().toString());
         
@@ -771,7 +821,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.FALSE, Boolean.FALSE, firstRefURI, null, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.FALSE, Boolean.FALSE, firstRefURI, null, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, firstRefURI, Boolean.FALSE, Boolean.FALSE, mockSecondNode,
                 secondNodeURL, null, null, secondNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
@@ -781,7 +831,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -810,14 +860,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.FALSE, Boolean.TRUE, firstRefURI, null, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.FALSE, Boolean.TRUE, firstRefURI, null, nodesToCheck, mockWorkspace, null);
         dealWithMatchedNode(mockExternalNode, externalNodeID, existingParents, mockFirstNode, Boolean.FALSE, firstNodeID, null);
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -855,7 +905,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode, secondNodeURL, null, null, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
         
@@ -867,7 +917,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
@@ -918,7 +968,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockSecondNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockFirstReference, completeFirstRefURI, Boolean.TRUE, Boolean.TRUE, mockSecondNode,
                 secondNodeURL, null, null, secondNodeURI, completeFirstRefURI, firstDocumentLocation, firstDocumentLocationFile);
@@ -929,7 +979,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         isRefInfoLink(mockMetadataDocument, mockFirstReference, Boolean.FALSE, mockSecondNode);
         
         reference_IsNotAPage(mockSecondReference, secondRefURI);
-        reference_WithoutLocalUri_MatchesNode(mockSecondReference, mockThirdNode, Boolean.FALSE, Boolean.FALSE, secondRefURI, null, nodesToCheck, workspaceID);
+        reference_WithoutLocalUri_MatchesNode(mockSecondReference, mockThirdNode, Boolean.FALSE, Boolean.FALSE, secondRefURI, null, nodesToCheck, mockWorkspace, null);
         //change the reference URI to the workspace URL and save the document in the same location
         updateLocalUri(mockMetadataDocument, mockSecondReference, secondRefURI, Boolean.FALSE, Boolean.FALSE, mockThirdNode,
                 thirdNodeURL, null, null, thirdNodeURI, null, firstDocumentLocation, firstDocumentLocationFile);
@@ -939,7 +989,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertTrue("Collection with failed links should be empty", failedLinks.isEmpty());
         assertTrue("Map of documents with external self-handle should be empty", documentsWithExternalSelfHandles.isEmpty());
@@ -969,7 +1019,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, mockWorkspace);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation,
                 firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
@@ -977,7 +1027,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
@@ -1013,14 +1063,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutMatch(mockFirstReference, Boolean.TRUE, firstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutMatch(mockFirstReference, Boolean.TRUE, firstRefURI, nodesToCheck, mockWorkspace);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
         
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
@@ -1055,14 +1105,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         initialChecks(mockMetadataDocument, parentDocumentHandle, Boolean.TRUE, references);
         //loop over references
         reference_IsNotAPage(mockFirstReference, firstRefURI);
-        reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, workspaceID);
+        reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, mockWorkspace);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, null, null, mockFirstReference, firstRefURI, expectedException);
         
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                workspaceID, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
+                mockWorkspace, nodesToCheck, mockFirstNode, mockMetadataDocument, documentsWithExternalSelfHandles);
         
         assertFalse("Collection with failed links should not be empty", failedLinks.isEmpty());
         assertTrue("Collection with failed links should have one entry", failedLinks.size() == 1);
@@ -1078,8 +1128,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     private void initialChecks(final ReferencingMetadataDocument mockDocument, final URI parentDocumentHandle, final boolean parentHandlePrefixKnown, final List<Reference> references) {
         
         context.checking(new Expectations() {{
+            
+            allowing(mockWorkspace).getWorkspaceID(); will(returnValue(workspaceID));
+            
             oneOf(mockMetadataApiBridge).getSelfHandleFromDocument(mockDocument); will(returnValue(parentDocumentHandle));
-            oneOf(mockHandleParser).isHandleUriWithKnownPrefix(parentDocumentHandle); will(returnValue(parentHandlePrefixKnown));
+            if(parentDocumentHandle != null) {
+                oneOf(mockHandleParser).isHandleUriWithKnownPrefix(parentDocumentHandle);
+                    will(returnValue(parentHandlePrefixKnown));
+            }
             
             oneOf(mockDocument).getDocumentReferences(); will(returnValue(references));
         }});
@@ -1116,7 +1172,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     
     private void reference_WithoutLocalUri_MatchesNode(final Reference mockReference, final WorkspaceNode mockNode,
             final boolean hasHandle, final boolean isExternal, final URI firstRefURI, final URI completeFirstRefURI,
-            final Collection<WorkspaceNode> nodesToCheck, final int workspaceID) {
+            final Collection<WorkspaceNode> nodesToCheck, final Workspace workspace, final Exception expectedException) {
         
         context.checking(new Expectations() {{
             //first reference contains a handle
@@ -1126,16 +1182,23 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         }});
         
         if(hasHandle) {
+            
             context.checking(new Expectations() {{
                 oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(completeFirstRefURI));
-                if(!isExternal) {
-                    //matches second node
-                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, completeFirstRefURI);
-                        will(returnValue(mockNode));
+                
+                if(expectedException != null) {
+                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, completeFirstRefURI);
+                        will(throwException(expectedException));
                 } else {
-                    //doesn't match any node
-                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, completeFirstRefURI);
-                        will(returnValue(null));
+                    if(!isExternal) {
+                        //matches second node
+                        oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, completeFirstRefURI);
+                            will(returnValue(mockNode));
+                    } else {
+                        //doesn't match any node
+                        oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, completeFirstRefURI);
+                            will(returnValue(null));
+                    }
                 }
             }});
         } else {
@@ -1155,14 +1218,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         if(isExternal) {
             context.checking(new Expectations() {{
                  //since a match was not found, perhaps it's an external node
-                oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspaceID, firstRefURI);
+                oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspace, firstRefURI);
                     will(returnValue(mockNode));
             }});
         }
     }
     
     private void reference_WithLocalUriButNoMatchThere_WithHandle_MatchesNode(final Reference mockReference, final WorkspaceNode mockNode, final URI firstRefLocalUri,
-            final boolean hasHandle, final boolean isExternal, final URI firstRefURI, final Collection<WorkspaceNode> nodesToCheck, final int workspaceID) {
+            final boolean hasHandle, final boolean isExternal, final URI firstRefURI, final Collection<WorkspaceNode> nodesToCheck, final Workspace workspace) {
         
         context.checking(new Expectations() {{
             //first reference contains a localURI
@@ -1180,11 +1243,11 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
                 if(!isExternal) {
                     //matches second node
-                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, firstRefURI);
+                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, firstRefURI);
                         will(returnValue(mockNode));
                 } else {
                     //doesn't match any node
-                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, firstRefURI);
+                    oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, firstRefURI);
                         will(returnValue(null));
                 }
             }});
@@ -1205,14 +1268,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         if(isExternal) {
             context.checking(new Expectations() {{
                  //since a match was not found, perhaps it's an external node
-                oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspaceID, firstRefURI);
+                oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspace, firstRefURI);
                     will(returnValue(mockNode));
             }});
         }
     }
     
     private void reference_WithoutMatch(final Reference mockReference, final boolean hasHandle,
-            final URI firstRefURI, final Collection<WorkspaceNode> nodesToCheck, final int workspaceID) {
+            final URI firstRefURI, final Collection<WorkspaceNode> nodesToCheck, final Workspace workspace) {
         
         context.checking(new Expectations() {{
             //first reference contains a URI
@@ -1225,7 +1288,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             context.checking(new Expectations() {{
                 oneOf(mockHandleParser).prepareAndValidateHandleWithHdlPrefix(firstRefURI); will(returnValue(firstRefURI));
                 //no matches
-                oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspaceID, nodesToCheck, firstRefURI);
+                oneOf(mockWorkspaceUploadNodeMatcher).findNodeForHandle(workspace, nodesToCheck, firstRefURI);
                     will(returnValue(null));
             }});
         } else {
@@ -1238,7 +1301,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         context.checking(new Expectations() {{
             //an attempt is made to check if the reference corresponds to an external node
-            oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspaceID, firstRefURI);
+            oneOf(mockWorkspaceUploadNodeMatcher).findExternalNodeForUri(workspace, firstRefURI);
                 will(returnValue(null));
         }});
     }
@@ -1383,8 +1446,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 oneOf(mockMetadataAPI).writeMetadataDocument(mockDocument, mockStreamResult);
 
                 //logger / message
-                oneOf(mockReference).getURI(); will(returnValue(referenceUri));
-                oneOf(mockNode).getWorkspaceNodeID(); will(returnValue(mockNodeID));
+                allowing(mockReference).getURI(); will(returnValue(referenceUri));
+                allowing(mockNode).getWorkspaceNodeID(); will(returnValue(mockNodeID));
             }});
         } else {
             context.checking(new Expectations() {{

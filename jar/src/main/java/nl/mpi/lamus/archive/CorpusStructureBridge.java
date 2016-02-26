@@ -48,4 +48,12 @@ public interface CorpusStructureBridge {
      * @return list with URIs (as strings) containing ancestors and descendants
      */
     public List<String> getURIsOfAncestorsAndDescendants(URI nodeURI);
+    
+    /**
+     * Retrieves a list containing the URIs
+     * of both the ancestors and descendants of the given node.
+     * @param nodeURI URI of the node
+     * @return list with URIs containing ancestors
+     */
+    public List<URI> getURIsOfAncestors(URI nodeURI);
 }

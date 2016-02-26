@@ -61,6 +61,7 @@ import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssue;
 import nl.mpi.lamus.metadata.validation.implementation.MetadataValidationIssueSeverity;
 import nl.mpi.lamus.typechecking.testing.ValidationIssueCollectionMatcher;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
 import nl.mpi.metadata.api.MetadataAPI;
@@ -115,6 +116,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock NodeUtil mockNodeUtil;
     @Mock HandleParser mockHandleParser;
     
+    @Mock Workspace mockWorkspace;
     @Mock FileItem mockFileItem;
     @Mock InputStream mockInputStream;
     @Mock FileInputStream mockFileInputStream;
@@ -701,6 +703,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -730,7 +733,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -771,6 +774,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -800,7 +804,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -849,6 +853,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -890,7 +895,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -940,6 +945,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -984,7 +990,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -1032,6 +1038,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1074,7 +1081,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -1124,6 +1131,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1153,7 +1161,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1210,6 +1218,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1239,7 +1248,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1299,6 +1308,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1342,7 +1352,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1384,6 +1394,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1411,7 +1422,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1458,6 +1469,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1485,7 +1497,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1547,6 +1559,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1598,7 +1611,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -1656,6 +1669,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1707,7 +1721,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //check links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -1746,6 +1760,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1794,6 +1809,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1807,7 +1823,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
                 will(returnValue(failedLinks));
         }});
         
@@ -1854,6 +1870,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1875,7 +1892,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);
@@ -1921,6 +1938,7 @@ public class LamusWorkspaceUploaderTest {
         
         context.checking(new Expectations() {{
             
+            oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             oneOf(mockWorkspaceDao).getWorkspaceTopNode(workspaceID); will(returnValue(mockWorkspaceTopNode));
             oneOf(mockWorkspaceTopNode).getArchiveURI(); will(returnValue(workspaceTopNodeArchiveURI));
             oneOf(mockNodeDataRetriever).getNodeLocalFile(workspaceTopNodeArchiveURI);
@@ -1941,7 +1959,7 @@ public class LamusWorkspaceUploaderTest {
             
             
             //still calls method to process links
-            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(workspaceID, uploadedNodes);
+            oneOf(mockWorkspaceUploadHelper).assureLinksInWorkspace(mockWorkspace, uploadedNodes);
         }});
         
         Collection<ImportProblem> result = uploader.processUploadedFiles(workspaceID, uploadedFiles);

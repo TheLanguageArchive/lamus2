@@ -32,6 +32,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
@@ -71,7 +72,8 @@ public class LamusWorkspaceUploadHelperTest {
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceUploadReferenceHandler mockWorkspaceUploadReferenceHandler;
     @Mock NodeUtil mockNodeUtil;
-    
+
+    @Mock Workspace mockWorkpace;
     @Mock WorkspaceNode mockParentNode;
     @Mock WorkspaceNode mockChildNode;
     @Mock WorkspaceNode mockArchiveExternalNode;
@@ -86,6 +88,8 @@ public class LamusWorkspaceUploadHelperTest {
     @Mock CorpusNode mockCorpusNode;
     
     @Mock ImportProblem mockUploadProblem;
+    
+    private final int workspaceID = 10;
     
     public LamusWorkspaceUploadHelperTest() {
     }
@@ -113,8 +117,6 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksRelativePathReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
-        final int workspaceID = 1;
-        
         final String parentFilename = "parent.cmdi";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
@@ -138,11 +140,11 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -150,8 +152,6 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksPidMetadataReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
-        final int workspaceID = 1;
-        
         final String parentFilename = "parent.cmdi";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
@@ -182,11 +182,11 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
@@ -194,8 +194,6 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksPidMetadataReference_FailedLink() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
-        final int workspaceID = 1;
-        
         final String parentFilename = "parent.cmdi";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
@@ -227,11 +225,11 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.containsAll(failedLinks));
     }
@@ -239,8 +237,6 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksPidMetadataReference_ExternalSelfHandle() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException, TransformerException {
         
-        final int workspaceID = 1;
-        
         final String parentFilename = "parent.cmdi";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
@@ -272,7 +268,7 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(doAll(AddEntryToMap.putElements(mockParentDocument, mockParentNode), returnValue(failedLinks)));
         }});
         
@@ -282,15 +278,13 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(mockParentDocument, parentFileURL);
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.containsAll(failedLinks));
     }
     
     @Test
     public void assureLinksPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
-        
-        final int workspaceID = 1;
         
         final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
         
@@ -317,19 +311,17 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
     
     @Test
     public void assureLinksArchiveExternalPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
-        
-        final int workspaceID = 1;
         
         final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
         
@@ -355,19 +347,17 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }
     
     @Test
     public void assureLinksExternalReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
-        
-        final int workspaceID = 1;
         
         final String parentFilename = "parent.txt";
         final URI parentFileURI = new URI("file:/workspaces/" + workspaceID + "/upload/" + parentFilename);
@@ -392,11 +382,11 @@ public class LamusWorkspaceUploadHelperTest {
             oneOf(mockParentNode).getWorkspaceURL(); will(returnValue(parentFileURL));
             oneOf(mockMetadataAPI).getMetadataDocument(parentFileURL); will(returnValue(mockParentDocument));            
             
-            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(workspaceID, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
+            oneOf(mockWorkspaceUploadReferenceHandler).matchReferencesWithNodes(mockWorkpace, nodesToCheck, mockParentNode, mockParentDocument, documentsWithInvalidSelfHandles);
                 will(returnValue(failedLinks));
         }});
         
-        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, nodesToCheck);
+        Collection<ImportProblem> result = workspaceUploadHelper.assureLinksInWorkspace(mockWorkpace, nodesToCheck);
         
         assertTrue("Result different from expected", result.isEmpty());
     }

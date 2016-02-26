@@ -167,6 +167,28 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         
         return collectionToReturn;
     }
+
+    /**
+     * @see CorpusStructureBridge#getURIsOfAncestors(java.net.URI)
+     */
+    @Override
+    public List<URI> getURIsOfAncestors(URI nodeURI) {
+        
+        List<URI> collectionToReturn = new ArrayList<>();
+        
+        URI ancestorURI = corpusStructureProvider.getCanonicalParent(nodeURI);
+        while(ancestorURI != null) {
+            URI ancestorPID = nodeResolver.getPID(ancestorURI);
+            if(ancestorPID == null) {
+                collectionToReturn.add(ancestorURI);
+            } else {
+                collectionToReturn.add(ancestorPID);
+            }
+            ancestorURI = corpusStructureProvider.getCanonicalParent(ancestorURI);
+        }
+        
+        return collectionToReturn;
+    }
     
     
     private void insertStringInTheBeginning(StringBuilder path, String toInsert) {

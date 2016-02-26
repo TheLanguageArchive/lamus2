@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.upload;
 
 import java.net.URI;
 import java.util.Collection;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 
 /**
@@ -31,12 +32,22 @@ public interface WorkspaceUploadNodeMatcher {
     /**
      * Tries to find a matching node for the given handle.
      * 
-     * @param workspaceID ID of the workspace
+     * @param workspace current workspace
      * @param nodesToCheck Collection of (uploaded) nodes to check
      * @param handle handle for which a match should be found
      * @return node that matches the given handle, null if none is found
      */
-    public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle);
+    public WorkspaceNode findNodeForHandle(Workspace workspace, Collection<WorkspaceNode> nodesToCheck, URI handle);
+    
+    /**
+     * Checks if the given URI corresponds to an external location,
+     * creating the WorkspaceNode for it, if necessary.
+     * 
+     * @param workspace current workspace
+     * @param uri URI to be checked
+     * @return node corresponding to the matching external location, null if none if found
+     */
+    public WorkspaceNode findExternalNodeForUri(Workspace workspace, URI uri);
     
     /**
      * Tries to find a matching node for the given path.
@@ -46,14 +57,4 @@ public interface WorkspaceUploadNodeMatcher {
      * @return node that matches the given path, null if none is found
      */
     public WorkspaceNode findNodeForPath(Collection<WorkspaceNode> nodesToCheck, String referencePath);
-    
-    /**
-     * Checks if the given URI corresponds to an external location,
-     * creating the WorkspaceNode for it, if necessary.
-     * 
-     * @param workspaceID ID of the workspace
-     * @param uri URI to be checked
-     * @return node corresponding to the matching external location, null if none if found
-     */
-    public WorkspaceNode findExternalNodeForUri(int workspaceID, URI uri);
 }

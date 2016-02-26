@@ -657,4 +657,58 @@ public class LamusCorpusStructureBridgeTest {
         
         assertEquals("Retrieved collection different from expected", ancestorsAndDescendants, retrievedCollection);
     }
+    
+    @Test
+    public void getPIDsOfAncestors_Root() {
+        
+        final List<URI> emptyAncestors = new ArrayList<>();
+        
+        final URI nodePID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodePID); will(returnValue(null));
+        }});
+        
+        List<URI> retrievedCollection = corpusStructureBridge.getURIsOfAncestors(nodePID);
+        
+        assertEquals("Retrieved collection different from expected", emptyAncestors, retrievedCollection);
+    }
+    
+    @Test
+    public void getPIDsOfAncestors() {
+        
+        final List<URI> ancestors = new ArrayList<>();
+        
+        final URI nodePID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI parentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI grandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        final URI greatGrandParentPID = URI.create("hdl:11142/" + UUID.randomUUID().toString());
+        
+        ancestors.add(parentPID);
+        ancestors.add(grandParentPID);
+        ancestors.add(greatGrandParentPID);
+        
+        context.checking(new Expectations() {{
+            
+            //loop
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(nodePID); will(returnValue(parentPID));
+            oneOf(mockNodeResolver).getPID(parentPID); will(returnValue(parentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(parentPID); will(returnValue(grandParentPID));
+            oneOf(mockNodeResolver).getPID(grandParentPID); will(returnValue(grandParentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(grandParentPID); will(returnValue(greatGrandParentPID));
+            oneOf(mockNodeResolver).getPID(greatGrandParentPID); will(returnValue(greatGrandParentPID));
+            
+            oneOf(mockCorpusStructureProvider).getCanonicalParent(greatGrandParentPID); will(returnValue(null));
+        }});
+        
+        List<URI> retrievedCollection = corpusStructureBridge.getURIsOfAncestors(nodePID);
+        
+        assertEquals("Retrieved collection different from expected", ancestors, retrievedCollection);
+    }
 }

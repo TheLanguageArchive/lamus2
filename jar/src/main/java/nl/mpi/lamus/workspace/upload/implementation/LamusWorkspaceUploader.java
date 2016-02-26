@@ -53,6 +53,7 @@ import nl.mpi.lamus.workspace.model.WorkspaceNodeStatus;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.metadata.validation.WorkspaceFileValidator;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploader;
@@ -218,6 +219,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         // collection containing the nodes that were eventually uploaded, to be used later for checking eventual links between them
         Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
+        Workspace workspace = this.workspaceDao.getWorkspace(workspaceID);
         WorkspaceNode topNode = this.workspaceDao.getWorkspaceTopNode(workspaceID);
         File topNodeArchiveLocalFile;
         try {
@@ -348,7 +350,7 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
         }
         
         //Searching for links among the uploaded files
-        Collection<ImportProblem> failedLinks = workspaceUploadHelper.assureLinksInWorkspace(workspaceID, uploadedNodes);
+        Collection<ImportProblem> failedLinks = workspaceUploadHelper.assureLinksInWorkspace(workspace, uploadedNodes);
         
         allUploadProblems.addAll(failedFiles);
         allUploadProblems.addAll(failedLinks);

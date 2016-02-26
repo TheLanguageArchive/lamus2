@@ -23,13 +23,16 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.handle.util.HandleParser;
+import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.workspace.factory.WorkspaceNodeFactory;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadNodeMatcher;
 import org.slf4j.Logger;
@@ -53,6 +56,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     private final WorkspaceNodeFactory workspaceNodeFactory;
     private final WorkspaceDao workspaceDao;
     private final NodeUtil nodeUtil;
+    private final CorpusStructureBridge corpusStructureBridge;
     
     
     @Autowired
@@ -60,20 +64,25 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             CorpusStructureProvider csProvider, NodeResolver nodeResolver,
             HandleParser handleParser,
             WorkspaceNodeFactory wsNodeFactory, WorkspaceDao wsDao,
-            NodeUtil nodeUtil) {
+            NodeUtil nodeUtil, CorpusStructureBridge csBridge) {
         this.corpusStructureProvider = csProvider;
         this.nodeResolver = nodeResolver;
         this.handleParser = handleParser;
         this.workspaceNodeFactory = wsNodeFactory;
         this.workspaceDao = wsDao;
         this.nodeUtil = nodeUtil;
+        this.corpusStructureBridge = csBridge;
     }
     
     /**
-     * @see WorkspaceUploadNodeMatcher#findNodeForHandle(int, java.util.Collection, java.net.URI)
+     * @see WorkspaceUploadNodeMatcher#findNodeForHandle(
+     *  nl.mpi.lamus.workspace.model.Workspace, java.util.Collection, java.net.URI) 
      */
     @Override
-    public WorkspaceNode findNodeForHandle(int workspaceID, Collection<WorkspaceNode> nodesToCheck, URI handle) {
+    public WorkspaceNode findNodeForHandle(Workspace workspace, Collection<WorkspaceNode> nodesToCheck, URI handle) {
+        
+        int topNodeID = workspace.getTopNodeID();
+        URI topNodeURI = workspace.getTopNodeArchiveURI();
         
         for(WorkspaceNode innerNode : nodesToCheck) {
             
@@ -92,11 +101,21 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
         // Search in the rest of the workspace for matches
         Collection<WorkspaceNode> matchingNodes = workspaceDao.getWorkspaceNodeByArchiveURI(handle);
         if(matchingNodes.size() == 1) { // one match - shouldn't be more than that
+            
+            //considered an external reference (and not legal)
+            if(matchingNodes.iterator().next().getWorkspaceNodeID() == topNodeID) {
+                // circular link found
+                    String message = "Circular link found in reference " + handle;
+                    logger.error(message);
+                    throw new IllegalStateException(message);
+            }
+            
             logger.debug("One match in workspace for URI " + handle);
             return matchingNodes.iterator().next();
         } else if(matchingNodes.size() > 1) { // several matches - problem
-            logger.error("Several matches found in workspace for URI " + handle);
-            throw new IllegalStateException("Several matches found in workspace for URI " + handle);
+            String message = "Several matches found in workspace for URI " + handle;
+            logger.error(message);
+            throw new IllegalStateException(message);
         }
         
         CorpusNode referenceCorpusNode = corpusStructureProvider.getNode(handle);
@@ -110,7 +129,18 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             
         if(referenceCorpusNode != null) { // match was not found but node exists in archive
             
-            WorkspaceNode newNode = workspaceNodeFactory.getNewExternalNodeFromArchive(workspaceID, referenceCorpusNode, handle, referenceUrl);
+            // check if this could cause a circular link in the tree
+            List<URI> ancestorsOfTopNode = corpusStructureBridge.getURIsOfAncestors(topNodeURI);
+            for(URI ancestor : ancestorsOfTopNode) {
+                if(handleParser.areHandlesEquivalent(handle, ancestor)) {
+                    // circular link found
+                    String message = "Circular link found in reference " + handle;
+                    logger.error(message);
+                    throw new IllegalStateException(message);
+                }
+            }
+            
+            WorkspaceNode newNode = workspaceNodeFactory.getNewExternalNodeFromArchive(workspace.getWorkspaceID(), referenceCorpusNode, handle, referenceUrl);
             workspaceDao.addWorkspaceNode(newNode);
             return newNode;
         }
@@ -119,10 +149,11 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     }
     
     /**
-     * @see WorkspaceUploadNodeMatcher#findExternalNodeForUri(int, java.net.URI)
+     * @see WorkspaceUploadNodeMatcher#findExternalNodeForUri(
+     *  nl.mpi.lamus.workspace.model.Workspace, java.net.URI) 
      */
     @Override
-    public WorkspaceNode findExternalNodeForUri(int workspaceID, URI uri) {
+    public WorkspaceNode findExternalNodeForUri(Workspace workspace, URI uri) {
         
         if(handleParser.isHandleUriWithKnownPrefix(uri)) {
             // shouldn't be a handle at this point
@@ -139,7 +170,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
                 logger.info(ex.getMessage());
                 return null;
             }
-            WorkspaceNode externalNode = workspaceNodeFactory.getNewExternalNode(workspaceID, uri);
+            WorkspaceNode externalNode = workspaceNodeFactory.getNewExternalNode(workspace.getWorkspaceID(), uri);
             workspaceDao.addWorkspaceNode(externalNode);
             return externalNode;
         } else {

@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.xml.transform.TransformerException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.model.NodeUtil;
+import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadHelper;
 import nl.mpi.lamus.workspace.upload.WorkspaceUploadReferenceHandler;
@@ -63,10 +64,11 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
     }
 
     /**
-     * @see WorkspaceUploadHelper#assureLinksInWorkspace(int, java.util.Collection)
+     * @see WorkspaceUploadHelper#assureLinksInWorkspace(
+     *  nl.mpi.lamus.workspace.model.Workspace, java.util.Collection)
      */
     @Override
-    public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck) {
+    public Collection<ImportProblem> assureLinksInWorkspace(Workspace workspace, Collection<WorkspaceNode> nodesToCheck) {
         
         logger.debug("Assuring links in workspace.");
         
@@ -95,7 +97,7 @@ public class LamusWorkspaceUploadHelper implements WorkspaceUploadHelper {
             
             Collection<ImportProblem> failedLinks =
                     workspaceUploadReferenceHandler.matchReferencesWithNodes(
-                    workspaceID, nodesToCheck, node, referencingDocument, documentsWithInvalidSelfHandles);
+                    workspace, nodesToCheck, node, referencingDocument, documentsWithInvalidSelfHandles);
             
             allFailedLinks.addAll(failedLinks);
         }

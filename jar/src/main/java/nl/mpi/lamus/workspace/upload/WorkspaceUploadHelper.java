@@ -19,6 +19,7 @@ package nl.mpi.lamus.workspace.upload;
 import java.util.Collection;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
+import nl.mpi.lamus.workspace.model.Workspace;
 
 /**
  * Provides some helping functionality to the file upload procedure.
@@ -30,9 +31,9 @@ public interface WorkspaceUploadHelper {
     /**
      * Checks if there are links among the nodes in the given collection
      * and adds them in the database.
-     * @param workspaceID ID of the workspace
+     * @param workspace current workspace
      * @param nodesToCheck Collection of nodes to be checked
      * @return collection containing eventual problems with the links
      */
-    public Collection<ImportProblem> assureLinksInWorkspace(int workspaceID, Collection<WorkspaceNode> nodesToCheck);
+    public Collection<ImportProblem> assureLinksInWorkspace(Workspace workspace, Collection<WorkspaceNode> nodesToCheck);
 }
