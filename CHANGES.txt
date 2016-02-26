@@ -1,9 +1,23 @@
-lamus2-1.6.0-RC2 (2016-02-??)
+lamus2-1.6.0 (2016-02-26)
 
     Changes:
+        - MANAGEMENT CONSOLE: Adjusted the columns for which sorting and filtering
+          is available (#4158).
         - TYPECHECKER CONFIGURATION: Moved the special typechecker configuration
           to the tomcat context. This allows the configuration of some folders
           to accept files considered ARCHIVABLE_SHORTTERM (#4852).
+        - SCHEMATRON: Separated the display of errors and warnings in the CMDI
+          schematron validation, so that the actual errors are more clearly visible.
+        - SAVE METADATA: During the workspace import, instead of saving the parent
+          file each time a reference was changed, now this is done only once per
+          child, improving the performance of the import (#4858).
+        - CIRCULAR LINKS UPLOAD: Added prevention against uploading trees with
+          a link to the top node of the workspace or one of its ancestors in
+          the archive (#4839).
+
+    Fixes:
+        - PRE-LOCK: Fixed an issue with the pre-lock of the top node of the
+          workspace, in case that node is already pre-locked.
 
 lamus2-1.6.0-RC1 (2016-02-12)
 
