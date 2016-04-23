@@ -31,7 +31,7 @@ The essential components for LAMUS 2 to function are:
 
 Before building the application, an external jar needs to be installed in your local maven repository.
 This is a dependency of the cmdi-validator jar, coming from the CLARIN repository.
-At the moment it's not pulling a particular jar it depends on - xercesImpl-patched. This jar is provided under jar/lib.
+At the moment it's not pulling a particular jar it depends on - xercesImpl-patched. This jar is provided under [jar/lib] (https://github.com/TheLanguageArchive/lamus2/tree/master/jar/lib).
 You can install it in your repository using the following command:
 
 ```
