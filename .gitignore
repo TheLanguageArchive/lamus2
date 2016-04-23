@@ -1,0 +1,13 @@
+.project
+.settings/
+jar/.classpath
+jar/.project
+jar/.settings/
+jar/target/
+targz/.project
+targz/.settings/
+targz/target/
+wicket/.classpath
+wicket/.project
+wicket/.settings/
+wicket/target/

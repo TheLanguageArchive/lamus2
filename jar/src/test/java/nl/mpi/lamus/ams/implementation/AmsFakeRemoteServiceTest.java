@@ -58,6 +58,7 @@ import org.junit.runner.RunWith;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.BeanUtils;
@@ -67,6 +68,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  *
  * @author guisil
  */
+@PowerMockIgnore("javax.security.auth.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AmsLicenseFactory.class, BeanUtils.class})
 public class AmsFakeRemoteServiceTest {

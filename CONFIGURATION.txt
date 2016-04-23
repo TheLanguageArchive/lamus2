@@ -269,8 +269,8 @@ The other necessary properties should be defined as parameters in the web contex
                    override="false"/>
 
         <Parameter name="nl.mpi.lamus.disallowed_folder_names_workspace"
-                   value="Folder names which are not allowed (reserved due to filesystem restrictions, for instance), defined as regular expressions."
-                   description="^tmp$,^temp$,^DesktopFolderDB$,^\.svn$"
+                   value="^tmp$,^temp$,^DesktopFolderDB$,^\.svn$"
+                   description="Folder names which are not allowed (reserved due to filesystem restrictions, for instance), defined as regular expressions."
                    override="false"/>
 
 
