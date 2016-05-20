@@ -135,10 +135,18 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
+        assertEquals("Result different from expected", expectedPath, result);
         
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue("TopNode/GrandParentNode"));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
         assertEquals("Result different from expected", expectedPath, result);
     }
     
@@ -232,6 +240,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -251,6 +260,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
@@ -269,6 +279,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -287,6 +298,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -295,7 +307,7 @@ public class WorkspaceExporterHelperTest {
         
         assertEquals("Result different from expected", expectedPath, result);
     }
-    
+
     @Test
     public void getNamePathToUseForThisExporter_Corpus_ParentIsTopNode() {
         
@@ -305,6 +317,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -324,6 +337,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
@@ -331,5 +345,35 @@ public class WorkspaceExporterHelperTest {
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
         
         assertEquals("Result different from expected", expectedPath, result);
+    }
+
+    @Test
+    public void getNamePathToUseForThisExporter_ExistingCorpus() {
+        
+        final String parentPath = "TopNode/GrandParentNode";
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(parentPath));
+        }});
+        
+        String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, "TopNodeName/GrandParentNodeName", Boolean.FALSE, AddedNodeExporter.class);
+        assertEquals("Result different from expected", parentPath, result);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(parentPath));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, "", Boolean.FALSE, AddedNodeExporter.class);
+        assertEquals("Result different from expected", parentPath, result);
+        
+        context.checking(new Expectations() {{
+        	exactly(2).of(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(parentPath));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, null, Boolean.TRUE, GeneralNodeExporter.class);
+        assertEquals("Result different from expected", parentPath, result);
     }
 }
