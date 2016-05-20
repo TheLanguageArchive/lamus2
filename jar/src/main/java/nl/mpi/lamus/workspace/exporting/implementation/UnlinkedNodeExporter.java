@@ -240,7 +240,7 @@ public class UnlinkedNodeExporter implements NodeExporter{
             currentReference.setURI(filenameUri);
             currentReference.setLocation(currentNodeUri);
             metadataApiBridge.saveMetadataDocument(referencingParentDocument, parentLocation);
-        } catch (IOException | MetadataException | TransformerException ex) {
+        } catch (IOException | MetadataException | TransformerException | NullPointerException ex) {
             String errorMessage = "Error writing file (updating child reference) for node " + parentLocation;
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
