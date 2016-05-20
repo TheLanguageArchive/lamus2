@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -79,9 +80,27 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
      */
     @Override
     public void moveFile(File originNodeFile, File targetNodeFile)
-            throws IOException {
-        
-        Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+    		throws IOException {
+    	//file was probably not uploaded via lamus. Move target file if symbolic link
+    	if (Files.isSymbolicLink(originNodeFile.toPath())) {
+    		File originLinkToNodeFile = originNodeFile;
+    		originNodeFile = Files.readSymbolicLink(originNodeFile.toPath()).toFile();
+    		try {
+    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        		Files.delete(originLinkToNodeFile.toPath());
+    		} catch (AtomicMoveNotSupportedException amnse) {
+    			logger.warn("Could not perform atomic move: " + amnse.getMessage() + ". Trying regular move...");
+    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    			Files.delete(originLinkToNodeFile.toPath());
+    		}
+    	} else {
+    		try {
+    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+    		} catch (AtomicMoveNotSupportedException amnse) {
+    			logger.warn("Could not perform atomic move: " + amnse.getMessage() + ". Trying regular move...");
+    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    		}
+    	}
     }
 
     /**
