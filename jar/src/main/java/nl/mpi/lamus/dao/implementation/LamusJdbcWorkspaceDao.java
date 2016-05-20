@@ -201,7 +201,7 @@ public class LamusJdbcWorkspaceDao implements WorkspaceDao {
         String deleteWorkspaceSql = "DELETE FROM workspace WHERE workspace_id = :workspace_id;";
         SqlParameterSource namedParameters = new MapSqlParameterSource()
                 .addValue("workspace_id", workspace.getWorkspaceID())
-                .addValue("archive_uri", workspace.getTopNodeArchiveURI().toString());
+                .addValue("archive_uri", workspace.getTopNodeArchiveURI() != null ? workspace.getTopNodeArchiveURI().toString() : "");
         this.namedParameterJdbcTemplate.update(deleteNodeReplacementSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLinkSql, namedParameters);
         this.namedParameterJdbcTemplate.update(deleteNodeLockSql, namedParameters);
