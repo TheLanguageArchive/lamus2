@@ -17,7 +17,9 @@
 package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
@@ -83,7 +85,7 @@ public class WorkspaceExporterHelperTest {
 
     
     @Test
-    public void getNamePathToUseForThisExporter_NullParentPath() {
+    public void getNamePathToUseForThisExporter_NullParentPath() throws MalformedURLException {
         
         // don't accept null
         
@@ -116,10 +118,11 @@ public class WorkspaceExporterHelperTest {
         // metadata, accept null
         
         final String currentNodePath = "TopNode/ParentNode";
-        final String expectedPath = currentNodePath;
+        final URL parentURL = new URL("file://parent");
         
         context.checking(new Expectations() {{
             exactly(2).of(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
             oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(currentNodePath));
         }});
         
@@ -129,16 +132,41 @@ public class WorkspaceExporterHelperTest {
     }
     
     @Test
-    public void getNamePathToUseForThisExporter_IgnoreCorpusPath() {
+    public void getNamePathToUseForThisExporter_IgnoreCorpusPath() throws MalformedURLException {
         
         String expectedPath = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
         }});
         
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
+
+        assertEquals("Result different from expected", expectedPath, result);
         
+        final URL parentURL = new URL("file://parent");
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
+            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
+
+        assertEquals("Result different from expected", expectedPath, result);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-11111111-1111-1111-1111-111111111111")));
+            oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue("parent"));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
         assertEquals("Result different from expected", expectedPath, result);
     }
     
@@ -232,6 +260,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -251,6 +280,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
@@ -269,6 +299,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -287,6 +318,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -295,7 +327,7 @@ public class WorkspaceExporterHelperTest {
         
         assertEquals("Result different from expected", expectedPath, result);
     }
-    
+
     @Test
     public void getNamePathToUseForThisExporter_Corpus_ParentIsTopNode() {
         
@@ -305,6 +337,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentName));
         }});
@@ -324,6 +357,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getName(); will(returnValue(parentName));
             oneOf(mockArchiveFileHelper).correctPathElement(parentName, "getNamePathToUseForThisExporter"); will(returnValue(parentPathName));
         }});
@@ -331,5 +365,57 @@ public class WorkspaceExporterHelperTest {
         String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentNamePathToClosestTopNode, Boolean.FALSE, AddedNodeExporter.class);
         
         assertEquals("Result different from expected", expectedPath, result);
+    }
+
+    @Test
+    public void getNamePathToUseForThisExporter_ExistingCorpus() throws MalformedURLException {
+        
+        final String parentPath = "TopNode/GrandParentNode";
+        final URL parentURL = new URL("file://parent");
+        
+        //Parent already in DB current node not
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
+            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+        }});
+        
+        //Parent and current nodes already in DB
+        String result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentPath, Boolean.FALSE, AddedNodeExporter.class);
+        assertEquals("Result different from expected",  parentPath + File.separator + "parent", result);
+        
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-11111111-1111-1111-1111-111111111111")));
+            oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue("parent"));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, parentPath, Boolean.FALSE, AddedNodeExporter.class);
+        assertEquals("Result different from expected",  parentPath + File.separator + "parent", result);
+        
+        //Parent is top node
+        context.checking(new Expectations() {{
+            oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
+            oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
+            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+        }});
+        
+        //null parent path
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, "", Boolean.FALSE, AddedNodeExporter.class);
+        assertEquals("Result different from expected", "parent", result);
+        
+        context.checking(new Expectations() {{
+        	exactly(2).of(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+        	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(parentPath));
+        }});
+        
+        result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, null, Boolean.TRUE, GeneralNodeExporter.class);
+        assertEquals("Result different from expected", parentPath, result);
     }
 }

@@ -198,7 +198,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         path.insert(0, toInsert);
     }
     
-    private String getFolderNameBeforeCorpusstructure(String directory) {
+    public String getFolderNameBeforeCorpusstructure(String directory) {
         String pathBeforeCorpusstructure = directory.substring(0, directory.indexOf(File.separator + corpusstructureDirectoryName + File.separator));
         return pathBeforeCorpusstructure.substring(pathBeforeCorpusstructure.lastIndexOf(File.separator) + 1, pathBeforeCorpusstructure.length());
     }

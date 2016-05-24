@@ -69,14 +69,26 @@ public class WorkspaceExporterHelper implements ExporterHelper {
         }
         
         if(nodeUtil.isNodeMetadata(currentNode)) {
-            if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet    
+        	String corpusNameDirectoryOfClosestTopNode = null;
+        	if (parentNode != null && parentNode.getArchiveURI() != null && parentCorpusNamePathToClosestTopNode != null) {
+        		//parent is in the DB -> calculate parent path from parent URL
+        		if (currentNode.getArchiveURI() != null) {
+        			corpusNameDirectoryOfClosestTopNode = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
+        		} else {
+        			corpusNameDirectoryOfClosestTopNode = corpusStructureBridge.getFolderNameBeforeCorpusstructure(parentNode.getArchiveURL().toString());
+        		}
+        	}
+            if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet  
                 namePathToReturn = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
             } else if(parentCorpusNamePathToClosestTopNode.isEmpty()) { // is top node
-                namePathToReturn = archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+            	namePathToReturn = corpusNameDirectoryOfClosestTopNode != null ? 
+            			corpusNameDirectoryOfClosestTopNode : archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             } else if(CorpusStructureBridge.IGNORE_CORPUS_PATH.equals(parentCorpusNamePathToClosestTopNode)) {
                 namePathToReturn = CorpusStructureBridge.IGNORE_CORPUS_PATH;
             } else {
-                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+            	namePathToReturn = corpusNameDirectoryOfClosestTopNode != null ? 
+            			parentCorpusNamePathToClosestTopNode + File.separator + corpusNameDirectoryOfClosestTopNode : 
+            				parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             }
         } else if(nodeUtil.isNodeInfoFile(currentNode)) {
             
