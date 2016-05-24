@@ -69,17 +69,14 @@ public class WorkspaceExporterHelper implements ExporterHelper {
         }
         
         if(nodeUtil.isNodeMetadata(currentNode)) {
-        	String corpusNamePathToClosestTopNode = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
-            if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet  
-                namePathToReturn = corpusNamePathToClosestTopNode;
+            if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet    
+                namePathToReturn = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
             } else if(parentCorpusNamePathToClosestTopNode.isEmpty()) { // is top node
-            	namePathToReturn = corpusNamePathToClosestTopNode != null ? 
-            			corpusNamePathToClosestTopNode : archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+                namePathToReturn = archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             } else if(CorpusStructureBridge.IGNORE_CORPUS_PATH.equals(parentCorpusNamePathToClosestTopNode)) {
                 namePathToReturn = CorpusStructureBridge.IGNORE_CORPUS_PATH;
             } else {
-            	namePathToReturn = corpusNamePathToClosestTopNode != null ? 
-            			corpusNamePathToClosestTopNode : parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+                namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
             }
         } else if(nodeUtil.isNodeInfoFile(currentNode)) {
             
