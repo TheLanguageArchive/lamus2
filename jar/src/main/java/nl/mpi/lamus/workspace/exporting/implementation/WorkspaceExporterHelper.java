@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
@@ -37,15 +38,17 @@ public class WorkspaceExporterHelper implements ExporterHelper {
     private final NodeUtil nodeUtil;
     private final CorpusStructureBridge corpusStructureBridge;
     private final ArchiveFileHelper archiveFileHelper;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final AllowedCmdiProfiles allowedCmdiProfiles;
     
     @Autowired
     public WorkspaceExporterHelper(NodeUtil nUtil, CorpusStructureBridge csBridge,
-            ArchiveFileHelper afHelper, AllowedCmdiProfiles cmdiProfiles) {
+            ArchiveFileHelper afHelper, AllowedCmdiProfiles cmdiProfiles, ArchiveFileLocationProvider afLocationProvider) {
         nodeUtil = nUtil;
         corpusStructureBridge = csBridge;
         archiveFileHelper = afHelper;
         allowedCmdiProfiles = cmdiProfiles;
+        archiveFileLocationProvider = afLocationProvider;
     }
 
     /**
@@ -75,7 +78,7 @@ public class WorkspaceExporterHelper implements ExporterHelper {
         		if (currentNode.getArchiveURI() != null) {
         			corpusNameDirectoryOfClosestTopNode = corpusStructureBridge.getCorpusNamePathToClosestTopNode(currentNode);
         		} else {
-        			corpusNameDirectoryOfClosestTopNode = corpusStructureBridge.getFolderNameBeforeCorpusstructure(parentNode.getArchiveURL().toString());
+        			corpusNameDirectoryOfClosestTopNode = archiveFileLocationProvider.getFolderNameBeforeCorpusstructure(parentNode.getArchiveURL().toString());
         		}
         	}
             if(parentCorpusNamePathToClosestTopNode == null) { // path hasn't been bootstrapped yet  

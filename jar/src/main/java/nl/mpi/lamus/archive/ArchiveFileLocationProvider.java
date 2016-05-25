@@ -86,4 +86,11 @@ public interface ArchiveFileLocationProvider {
      * @return true if file is located in the orphans directory
      */
     public boolean isFileInOrphansDirectory(File fileToCheck);
+    
+    /**
+     * Retrieves the name of the corpusstruture's parent directory.
+     * @param folder a string containing the path from where to extract the name
+     * @return the name of the corpusstruture's parent directory
+     */
+    public String getFolderNameBeforeCorpusstructure(String folder);
 }

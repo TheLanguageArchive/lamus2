@@ -356,6 +356,16 @@ public class LamusArchiveFileLocationProviderTest {
         assertFalse("Result should be false", isFileInOrphansDirectory);
     }
     
+    @Test
+    public void getFolderNameBeforeCorpusstructure_wCorpusstructure() {
+        final String testPath = "/archive/root/TopNode/" + corpusstructureDirectoryName + "/something";
+        final String expectedName = "TopNode";
+        
+        String result = archiveFileLocationProvider.getFolderNameBeforeCorpusstructure(testPath);
+        		
+        assertEquals("Corpusstructure folder different from expected", result, expectedName);
+    }
+    
     
     private void prepareExistingTempDirectory() throws IOException {
         tempDirectory = testFolder.newFolder();

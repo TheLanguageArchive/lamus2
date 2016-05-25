@@ -25,6 +25,7 @@ import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
 import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import org.apache.commons.io.FilenameUtils;
@@ -46,6 +47,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
     private final ArchiveFileHelper archiveFileHelper;
+    private final ArchiveFileLocationProvider archiveFileLocationProvider;
     
     private final String corpusstructureDirectoryName;
     private final String metadataDirectoryName;
@@ -54,7 +56,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
     @Autowired
     public LamusCorpusStructureBridge(
             CorpusStructureProvider csProvider, NodeResolver nResolver,
-            ArchiveFileHelper afHelper,
+            ArchiveFileHelper afHelper, ArchiveFileLocationProvider afLocationProvider,
             @Qualifier("corpusstructureDirectoryName") String csDirName,
             @Qualifier("metadataDirectoryName") String mdDirName) {
         corpusStructureProvider = csProvider;
@@ -62,6 +64,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         archiveFileHelper = afHelper;
         corpusstructureDirectoryName = csDirName;
         metadataDirectoryName = mdDirName;
+        archiveFileLocationProvider = afLocationProvider;
     }
 
     /**
@@ -114,7 +117,7 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
                     
                     //for the top node, the path name (instead of the node name) should be used, since top node folders were probably created by corpus managers
                     if(!nextNodeNameToInsert.isEmpty()) {
-                        insertStringInTheBeginning(pathSoFar, getFolderNameBeforeCorpusstructure(currentDirectory));
+                        insertStringInTheBeginning(pathSoFar, archiveFileLocationProvider.getFolderNameBeforeCorpusstructure(currentDirectory));
                     }
                     
                 } else {
@@ -196,10 +199,5 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
             path.insert(0, File.separator);
         }
         path.insert(0, toInsert);
-    }
-    
-    public String getFolderNameBeforeCorpusstructure(String directory) {
-        String pathBeforeCorpusstructure = directory.substring(0, directory.indexOf(File.separator + corpusstructureDirectoryName + File.separator));
-        return pathBeforeCorpusstructure.substring(pathBeforeCorpusstructure.lastIndexOf(File.separator) + 1, pathBeforeCorpusstructure.length());
     }
 }

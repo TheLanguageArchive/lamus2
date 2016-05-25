@@ -20,7 +20,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.UUID;
 import nl.mpi.lamus.archive.ArchiveFileHelper;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
@@ -54,6 +56,7 @@ public class WorkspaceExporterHelperTest {
     @Mock NodeUtil mockNodeUtil;
     @Mock CorpusStructureBridge mockCorpusStructureBridge;
     @Mock ArchiveFileHelper mockArchiveFileHelper;
+    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock AllowedCmdiProfiles mockAllowedCmdiProfiles;
     
     @Mock WorkspaceNode mockCurrentNode;
@@ -76,7 +79,7 @@ public class WorkspaceExporterHelperTest {
     
     @Before
     public void setUp() {
-        exporterHelper = new WorkspaceExporterHelper(mockNodeUtil, mockCorpusStructureBridge, mockArchiveFileHelper, mockAllowedCmdiProfiles);
+        exporterHelper = new WorkspaceExporterHelper(mockNodeUtil, mockCorpusStructureBridge, mockArchiveFileHelper, mockAllowedCmdiProfiles, mockArchiveFileLocationProvider);
     }
     
     @After
@@ -122,7 +125,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             exactly(2).of(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(currentNodePath));
         }});
         
@@ -149,10 +152,10 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
-            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+            oneOf(mockArchiveFileLocationProvider).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
         }});
         
         result = exporterHelper.getNamePathToUseForThisExporter(mockCurrentNode, mockParentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, Boolean.TRUE, UnlinkedNodeExporter.class);
@@ -161,8 +164,8 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00000000-0000-0000-0000-000000000000")));
-            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-11111111-1111-1111-1111-111111111111")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue("parent"));
         }});
         
@@ -376,10 +379,10 @@ public class WorkspaceExporterHelperTest {
         //Parent already in DB current node not
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
-            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+            oneOf(mockArchiveFileLocationProvider).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
         }});
         
         //Parent and current nodes already in DB
@@ -388,8 +391,8 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
-            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-11111111-1111-1111-1111-111111111111")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
+            oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue("parent"));
         }});
         
@@ -399,10 +402,10 @@ public class WorkspaceExporterHelperTest {
         //Parent is top node
         context.checking(new Expectations() {{
             oneOf(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
             oneOf(mockCurrentNode).getArchiveURI(); will(returnValue(null));
             oneOf(mockParentNode).getArchiveURL(); will(returnValue(parentURL));
-            oneOf(mockCorpusStructureBridge).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
+            oneOf(mockArchiveFileLocationProvider).getFolderNameBeforeCorpusstructure(parentURL.toString()); will(returnValue("parent"));
         }});
         
         //null parent path
@@ -411,7 +414,7 @@ public class WorkspaceExporterHelperTest {
         
         context.checking(new Expectations() {{
         	exactly(2).of(mockNodeUtil).isNodeMetadata(mockCurrentNode); will(returnValue(Boolean.TRUE));
-            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/00-00-00000000-0000-0000-0000-000000000000")));
+            oneOf(mockParentNode).getArchiveURI(); will(returnValue(URI.create("hdl:11142/" + UUID.randomUUID().toString())));
         	oneOf(mockCorpusStructureBridge).getCorpusNamePathToClosestTopNode(mockCurrentNode); will(returnValue(parentPath));
         }});
         

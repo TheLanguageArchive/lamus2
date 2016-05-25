@@ -56,11 +56,4 @@ public interface CorpusStructureBridge {
      * @return list with URIs containing ancestors
      */
     public List<URI> getURIsOfAncestors(URI nodeURI);
-    
-    /**
-     * Retrieves the name of the parent directory for the defined corpusstructure directory.
-     * @param nodeURI URI of the node
-     * @return list with URIs containing ancestors
-     */
-    public String getFolderNameBeforeCorpusstructure(String directory);
 }
