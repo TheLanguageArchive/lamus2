@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 
 /**
  * @see WorkspaceManager
@@ -197,6 +198,26 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         
         Workspace workspace = workspaceDao.getWorkspace(workspaceID);
         WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        
+        try {
+			workspaceFileValidator.triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
+		} catch (CMDIValidatorInitException e) {
+			String errorMessage = "Cannot submit workspace. Unknown error when trying to preform metadata schema validation.";
+			throw new WorkspaceExportException(errorMessage, workspaceID, e);
+		} catch (MetadataValidationException mvex) {
+			String issuesMessage = workspaceFileValidator.validationIssuesToString(mvex.getValidationIssues());
+            if(workspaceFileValidator.validationIssuesContainErrors(mvex.getValidationIssues())) {
+                throw mvex;
+            } else {
+                String message;
+                if(issuesMessage.isEmpty()) {
+                    message = mvex.getMessage();
+                } else {
+                    message = issuesMessage;
+                }
+                logger.warn(message);
+            }
+		}
         
         try{
             workspaceFileValidator.triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);

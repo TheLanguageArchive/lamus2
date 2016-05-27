@@ -68,6 +68,7 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
             break;
         case ERROR:
             logger.error("ERR: file ["+file+"] is invalid:");
+            String errorMessage = "";
             for (CMDIValidationReport.Message msg : report.getMessages()) {
                 if (msg.getMessage().contains("Failed to read schema document ''")) {
                     skip++;
@@ -75,14 +76,15 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
                 }
                 if ((msg.getLineNumber() != -1) &&
                         (msg.getColumnNumber() != -1)) {
-                    logger.error(" ("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]");
+                	errorMessage = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]";
                 } else {
-                    logger.error(" ("+msg.getSeverity().getShortcut()+") "+msg.getMessage());
+                	errorMessage = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage();
                 }
+                logger.error(errorMessage);
             }
             
             //An exception should be thrown in this case. Returning all the issues is not necessary at the moment.
-            throw new CMDIValidatorException("Metadata file {} is invalid");
+            throw new CMDIValidatorException("Metadata file " + file + " is invalid. Reason: " + errorMessage);
             
         default:
             throw new CMDIValidatorException("unexpected severity: " +

@@ -65,4 +65,12 @@ public interface WorkspaceFileValidator {
      * @return String containing the main information about the issues in the collection
      */
     public String validationIssuesToString(Collection<MetadataValidationIssue> issues);
+    
+    /**
+     * Given a workspace, it gets the relevant metadata files and
+     * performs a schema validation on them.
+     * @param workspaceID ID of the workspace to validate
+     */
+    public void triggerSchemaValidationForMetadataFilesInWorkspace(int workspaceID) 
+    		throws MetadataValidationException, CMDIValidatorInitException;
 }

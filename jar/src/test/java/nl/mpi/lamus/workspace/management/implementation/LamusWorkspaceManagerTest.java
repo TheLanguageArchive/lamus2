@@ -61,6 +61,7 @@ import org.jmock.lib.legacy.ClassImposteriser;
 import static org.junit.Assert.*;
 import org.junit.*;
 import org.springframework.test.util.ReflectionTestUtils;
+import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 
 /**
  *
@@ -607,7 +608,7 @@ public class LamusWorkspaceManagerTest {
     public void submitWorkspaceSuccessful()
             throws InterruptedException, ExecutionException, URISyntaxException,
             MalformedURLException, WorkspaceNotFoundException,
-            WorkspaceExportException, MetadataValidationException {
+            WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
 
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -628,6 +629,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
@@ -661,7 +663,7 @@ public class LamusWorkspaceManagerTest {
     @Test
     public void submitWorkspace_ValidationIssues_Error()
             throws InterruptedException, ExecutionException, URISyntaxException,
-            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
+            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
         
         final int workspaceID = 1;
         
@@ -686,6 +688,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
@@ -702,7 +705,7 @@ public class LamusWorkspaceManagerTest {
     @Test
     public void submitWorkspace_ValidationIssues_Warning()
             throws InterruptedException, ExecutionException, URISyntaxException,
-            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException {
+            MalformedURLException, WorkspaceNotFoundException, WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
         
         final int workspaceID = 1;
         
@@ -735,6 +738,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID); will(throwException(expectedException));
             oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
             oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.FALSE));
@@ -795,7 +799,7 @@ public class LamusWorkspaceManagerTest {
     public void submitWorkspaceThreadInterrupted()
             throws InterruptedException, ExecutionException, URISyntaxException,
             MalformedURLException, WorkspaceNotFoundException,
-            WorkspaceExportException, MetadataValidationException {
+            WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -819,6 +823,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
@@ -859,7 +864,7 @@ public class LamusWorkspaceManagerTest {
     public void submitWorkspaceExecutionException()
             throws InterruptedException, ExecutionException, URISyntaxException,
             MalformedURLException, WorkspaceNotFoundException,
-            WorkspaceExportException, MetadataValidationException {
+            WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -883,6 +888,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);
@@ -923,7 +929,7 @@ public class LamusWorkspaceManagerTest {
     public void submitWorkspaceFails()
             throws InterruptedException, ExecutionException, URISyntaxException,
             MalformedURLException, WorkspaceNotFoundException,
-            WorkspaceExportException, MetadataValidationException {
+            WorkspaceExportException, MetadataValidationException, CMDIValidatorInitException {
         
         final int workspaceID = 1;
         Calendar startCalendar = Calendar.getInstance();
@@ -946,6 +952,7 @@ public class LamusWorkspaceManagerTest {
             
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(mockWorkspace));
             
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForMetadataFilesInWorkspace(workspaceID);
             oneOf(mockWorkspaceFileValidator).triggerSchematronValidationForMetadataFilesInWorkspace(workspaceID);
             
             oneOf(mockWorkspace).setStatus(submittedStatus);

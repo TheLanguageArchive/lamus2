@@ -121,7 +121,7 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
      */
     @Override
     public void triggerSchemaValidationForFile(int workspaceID, File file)
-            throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException {
+            throws CMDIValidatorInitException, MetadataValidationException {
         
         LamusMetadataValidationHandler handler = new LamusMetadataValidationHandler(workspaceID);
         
@@ -138,6 +138,35 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
                     workspaceID, ex, "Problems with schema validation",
                     new ArrayList<MetadataValidationIssue>());
         }
+    }
+
+    /**
+     * @see WorkspaceFileValidator#triggerSchemaValidationForMetadataFilesInWorkspace(int)
+     */
+    @Override
+    public void triggerSchemaValidationForMetadataFilesInWorkspace(int workspaceID) 
+    		throws MetadataValidationException, CMDIValidatorInitException {     
+        
+        logger.debug("Performing schema validation for metadata files in the tree of workspace " + workspaceID);
+        Collection<MetadataValidationIssue> validationIssues = new ArrayList<>();
+        
+        Collection<WorkspaceNode> metadataNodesInTree = workspaceDao.getMetadataNodesInTreeForWorkspace(workspaceID);
+        for(WorkspaceNode node : metadataNodesInTree) {
+    		File fileToValidate = new File(node.getWorkspaceURL().getPath());
+        	try {
+                triggerSchemaValidationForFile(workspaceID, fileToValidate);                
+        	} catch (MetadataValidationException ex) {
+        		validationIssues.add(new MetadataValidationIssue(fileToValidate, ex.getCause().getMessage(), "error"));
+        	}
+        }  
+        
+        if(!validationIssues.isEmpty()) {
+            throwMetadataValidationException(
+                    workspaceID, null, "Problems with schema metadata validation",
+                    validationIssues);
+        }
+        
+        logger.debug("Schematron metadata validation for workspace " + workspaceID + "  was performed without any issues");
     }
 
     /**
