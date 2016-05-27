@@ -117,6 +117,12 @@ header > ul#header_info_container > li > a:hover {
     height: 70%;
 }
 
+/* Workspace management page */
+
+#mainPageChild > form {
+	height: 135%;
+	overflow: scroll;
+}
 
 /* Feedback panel */
 
