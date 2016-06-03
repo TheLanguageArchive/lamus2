@@ -374,7 +374,7 @@ public class WorkspaceExporterHelperTest {
     public void getNamePathToUseForThisExporter_ExistingCorpus() throws MalformedURLException {
         
         final String parentPath = "TopNode/GrandParentNode";
-        final URL parentURL = new URL("file://parent");
+        final URL parentURL = new URL("file://parent/Corpusstructure");
         
         //Parent already in DB current node not
         context.checking(new Expectations() {{

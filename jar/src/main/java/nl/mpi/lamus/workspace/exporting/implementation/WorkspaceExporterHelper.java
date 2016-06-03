@@ -89,9 +89,18 @@ public class WorkspaceExporterHelper implements ExporterHelper {
             } else if(CorpusStructureBridge.IGNORE_CORPUS_PATH.equals(parentCorpusNamePathToClosestTopNode)) {
                 namePathToReturn = CorpusStructureBridge.IGNORE_CORPUS_PATH;
             } else {
-            	namePathToReturn = corpusNameDirectoryOfClosestTopNode != null ? 
-            			parentCorpusNamePathToClosestTopNode + File.separator + corpusNameDirectoryOfClosestTopNode : 
-            				parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+            	if (corpusNameDirectoryOfClosestTopNode != null) {
+            		int nameIndexInPath = parentCorpusNamePathToClosestTopNode.lastIndexOf(corpusNameDirectoryOfClosestTopNode);
+            		if (nameIndexInPath == -1) {
+            			namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + corpusNameDirectoryOfClosestTopNode;
+            		} else if (nameIndexInPath == 0) {
+            			namePathToReturn = corpusNameDirectoryOfClosestTopNode;
+            		} else {
+            			namePathToReturn = parentCorpusNamePathToClosestTopNode.substring(0, nameIndexInPath) + File.separator + corpusNameDirectoryOfClosestTopNode;
+            		}
+            	} else {
+            		namePathToReturn = parentCorpusNamePathToClosestTopNode + File.separator + archiveFileHelper.correctPathElement(parentNode.getName(), "getNamePathToUseForThisExporter");
+            	}
             }
         } else if(nodeUtil.isNodeInfoFile(currentNode)) {
             
