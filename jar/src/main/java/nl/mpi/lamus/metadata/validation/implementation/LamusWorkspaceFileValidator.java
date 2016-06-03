@@ -72,7 +72,7 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
             }
             
             Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(allFilesToValidate);
-                validationIssues.addAll(issues);
+            validationIssues.addAll(issues);
             
         } catch(Exception ex) {
             throwMetadataValidationException(
@@ -133,10 +133,19 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         
         try {
             processor.process(validator);
+            if (!handler.getValidationWarnings().isEmpty()) {
+            	MetadataValidationException mvex = new MetadataValidationException("Warnings in CMDI schema validation", workspaceID, null);
+            	for (String warning : handler.getValidationWarnings()) {
+                    mvex.addValidationIssue(new MetadataValidationIssue(file, warning, MetadataValidationIssueSeverity.WARN));
+            	}
+                throw mvex;
+            }
         } catch(CMDIValidatorException ex) {
-            throwMetadataValidationException(
-                    workspaceID, ex, "Problems with schema validation",
-                    new ArrayList<MetadataValidationIssue>());
+            MetadataValidationException mvex = new MetadataValidationException("Errors with CMDI schema validation", workspaceID, ex);
+        	for (String error : handler.getValidationErrors()) {
+                mvex.addValidationIssue(new MetadataValidationIssue(file, error, MetadataValidationIssueSeverity.ERROR));
+        	}
+        	throw mvex;
         }
     }
 
@@ -156,7 +165,7 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         	try {
                 triggerSchemaValidationForFile(workspaceID, fileToValidate);                
         	} catch (MetadataValidationException ex) {
-        		validationIssues.add(new MetadataValidationIssue(fileToValidate, ex.getCause().getMessage(), "error"));
+        		validationIssues.addAll(ex.getValidationIssues());
         	}
         }  
         

@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
-import eu.clarin.cmdi.validator.CMDIValidatorException;
 import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
@@ -139,7 +138,7 @@ public class LamusWorkspaceUploaderTest {
     @Mock MetadataValidationIssue mockValidationIssue1;
     @Mock MetadataValidationIssue mockValidationIssue2;
     @Mock MetadataValidationException mockValidationException;
-    @Mock CMDIValidatorException mockCMDIValidatorException;
+    @Mock CMDIValidatorInitException mockCMDIValidatorInitException;
     @Mock ImportProblem mockUploadProblem;
     
     @Factory
@@ -1264,7 +1263,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException, CMDIValidatorInitException, CMDIValidatorException {
+    public void processOneUploadedMetadataFile_withOneValidationIssue_Warning() throws URISyntaxException, MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, MetadataValidationException, WorkspaceException, IOException, MetadataException, CMDIValidatorInitException {
         
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
@@ -1386,6 +1385,14 @@ public class LamusWorkspaceUploaderTest {
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
+        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
+        issues.add(mockValidationIssue1);
+        
+        final String validationIssuesString = "Metadata file [" + filename + "] is invalid";
+        
+        final MetadataValidationException expectedException = new MetadataValidationException(validationIssuesString, workspaceID, null);
+        expectedException.addValidationIssues(issues);
+        
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         
         final String expectedErrorMessage = "Metadata file [" + filename + "] is invalid";
@@ -1413,9 +1420,9 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(mockValidationException));
-            ignoring(mockValidationException);
-            oneOf(mockFile1).getName(); will(returnValue(filename));
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(expectedException));
+            oneOf(mockWorkspaceFileValidator).validationIssuesToString(with(equivalentValidationIssueCollection(issues))); will(returnValue(validationIssuesString));
+            oneOf(mockWorkspaceFileValidator).validationIssuesContainErrors(with(equivalentValidationIssueCollection(issues))); will(returnValue(Boolean.TRUE));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceFileHandler).deleteFile(mockFile1);
@@ -1438,7 +1445,7 @@ public class LamusWorkspaceUploaderTest {
     }
     
     @Test
-    public void processOneUploadedMetadataFile_ValidatorException() throws MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, IOException, MetadataException, CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException, WorkspaceException {
+    public void processOneUploadedMetadataFile_ValidatorException() throws MalformedURLException, WorkspaceNodeNotFoundException, NodeNotFoundException, TypeCheckerException, IOException, MetadataException, CMDIValidatorInitException, MetadataValidationException, WorkspaceException {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1488,8 +1495,8 @@ public class LamusWorkspaceUploaderTest {
             
             oneOf(mockMetadataAPI).getMetadataDocument(uploadedFileURL); will(returnValue(mockMetadataDocument));
             
-            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(mockCMDIValidatorException));
-            ignoring(mockCMDIValidatorException);
+            oneOf(mockWorkspaceFileValidator).triggerSchemaValidationForFile(workspaceID, mockFile1); will(throwException(mockCMDIValidatorInitException));
+            ignoring(mockCMDIValidatorInitException);
             oneOf(mockFile1).getName(); will(returnValue(filename));
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(mockFile1); will(returnValue(Boolean.FALSE));

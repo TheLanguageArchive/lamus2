@@ -141,12 +141,12 @@ public class WorkspaceImportRunnerTest {
         }});
         
         
-        boolean result = executeRunner();
+        Collection<ImportProblem> result = executeRunner();
         
         long timeoutInMs = 2000L;
         synchroniser.waitUntil(importing.is("finished"), timeoutInMs);
         
-        assertTrue("Execution result should have been successful (true)", result);
+        assertTrue("Execution result should have been successful (true)", result != null);
     }
     
     @Test
@@ -187,10 +187,10 @@ public class WorkspaceImportRunnerTest {
     }
     
     
-    private boolean executeRunner() throws InterruptedException, ExecutionException {
+    private Collection<ImportProblem> executeRunner() throws InterruptedException, ExecutionException {
         
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<Boolean> result = executorService.submit(workspaceImportRunner);
+        Future<Collection<ImportProblem>> result = executorService.submit(workspaceImportRunner);
         return result.get();
     }
 }

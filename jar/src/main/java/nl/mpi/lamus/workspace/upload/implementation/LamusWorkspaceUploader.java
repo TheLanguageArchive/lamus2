@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.workspace.upload.implementation;
 
-import eu.clarin.cmdi.validator.CMDIValidatorException;
 import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
@@ -281,10 +280,14 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
                 try {
                     workspaceFileValidator.triggerSchemaValidationForFile(workspaceID, currentFile);
                 } catch(MetadataValidationException ex) {
-                    String errorMessage = "Metadata file [" + currentFile.getName() + "] is invalid";
-                    failUploadForFile(currentFile, errorMessage, null, failedFiles);
-                    continue;
-                } catch(CMDIValidatorInitException | CMDIValidatorException ex) {
+                    String issuesMessage = workspaceFileValidator.validationIssuesToString(ex.getValidationIssues());
+                    if(workspaceFileValidator.validationIssuesContainErrors(ex.getValidationIssues())) {
+                    	failUploadForFile(currentFile, issuesMessage, null, failedFiles);
+                    	continue;
+                    } else {
+                        logger.warn(issuesMessage);
+                    }
+                } catch(CMDIValidatorInitException ex) {
                     String errorMessage = "Problems with the metadata validation when processing [" + currentFile.getName() + "]";
                     failUploadForFile(currentFile, errorMessage, ex, failedFiles);
                     continue;

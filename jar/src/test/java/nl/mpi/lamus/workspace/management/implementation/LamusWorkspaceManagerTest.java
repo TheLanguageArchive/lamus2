@@ -45,6 +45,7 @@ import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunnerFactory;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
 import nl.mpi.lamus.workspace.model.Workspace;
@@ -157,7 +158,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
-            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFuture).get(); will(returnValue(new ArrayList<ImportProblem>()));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(returnValue(expectedWorkspace));
         }});
         
@@ -320,7 +321,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
-            oneOf(mockFuture).get(); will(returnValue(Boolean.FALSE));
+            oneOf(mockFuture).get(); will(returnValue(null));
             oneOf(mockWorkspaceDao).unlockAllNodesOfWorkspace(workspaceID);
         }});
         
@@ -366,7 +367,7 @@ public class LamusWorkspaceManagerTest {
             oneOf(mockWorkspaceImportRunner).setWorkspace(newWorkspace);
             oneOf(mockWorkspaceImportRunner).setTopNodeArchiveURI(archiveNodeURI);
             oneOf(mockExecutorService).submit(mockWorkspaceImportRunner); will(returnValue(mockFuture));
-            oneOf(mockFuture).get(); will(returnValue(Boolean.TRUE));
+            oneOf(mockFuture).get(); will(returnValue(new ArrayList<ImportProblem>()));
             oneOf(mockWorkspaceDao).getWorkspace(workspaceID); will(throwException(expectedException));
         }});
         

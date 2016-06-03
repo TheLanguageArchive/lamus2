@@ -45,6 +45,12 @@ public class MetadataValidationIssue {
         }
     }
     
+    public MetadataValidationIssue(File file, String message, MetadataValidationIssueSeverity severity) {
+        this.metadataFile = file;
+        this.message = message;
+        this.severity = severity;
+    }
+    
     public MetadataValidationIssue(File file, String assertionTest, String message, String severity) {
         this(file, message, severity);
         this.assertionTest = assertionTest;

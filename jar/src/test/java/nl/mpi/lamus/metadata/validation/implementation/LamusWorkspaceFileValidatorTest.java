@@ -289,18 +289,18 @@ public class LamusWorkspaceFileValidatorTest {
     }
     
     @Test
-    public void triggerSchemaValidation_valid() throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException {
+    public void triggerSchemaValidation_valid() throws CMDIValidatorInitException, MetadataValidationException {
         
         File validFile = getResourceFromLocation("cmdi_validation/testing_schemaValidation_valid.cmdi");
         workspaceFileValidator.triggerSchemaValidationForFile(workspaceID, validFile);
     }
     
     @Test
-    public void triggerValidation_invalid() throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException {
+    public void triggerValidation_invalid() throws CMDIValidatorInitException, MetadataValidationException {
         
         File invalidFile = getResourceFromLocation("cmdi_validation/testing_schemaValidation_invalid.cmdi");
         
-        final String expectedErrorMessage = "Problems with schema validation";
+        final String expectedErrorMessage = "Errors with CMDI schema validation";
         
         try {
             workspaceFileValidator.triggerSchemaValidationForFile(workspaceID, invalidFile);
@@ -312,11 +312,11 @@ public class LamusWorkspaceFileValidatorTest {
     }
     
     @Test
-    public void triggerValidation_malformed() throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException {
+    public void triggerValidation_malformed() throws CMDIValidatorInitException, MetadataValidationException {
         
         File malformedFile = getResourceFromLocation("cmdi_validation/testing_schemaValidation_malformed.cmdi");
         
-        final String expectedErrorMessage = "Problems with schema validation";
+        final String expectedErrorMessage = "Errors with CMDI schema validation";
         
         try {
             workspaceFileValidator.triggerSchemaValidationForFile(workspaceID, malformedFile);

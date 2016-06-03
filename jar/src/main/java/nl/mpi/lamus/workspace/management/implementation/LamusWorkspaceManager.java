@@ -18,6 +18,7 @@ package nl.mpi.lamus.workspace.management.implementation;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -35,6 +36,8 @@ import nl.mpi.lamus.util.CalendarHelper;
 import nl.mpi.lamus.workspace.exporting.implementation.WorkspaceExportRunner;
 import nl.mpi.lamus.workspace.exporting.WorkspaceExportRunnerFactory;
 import nl.mpi.lamus.workspace.factory.WorkspaceFactory;
+import nl.mpi.lamus.workspace.importing.implementation.FileImportProblem;
+import nl.mpi.lamus.workspace.importing.implementation.ImportProblem;
 import nl.mpi.lamus.workspace.importing.implementation.WorkspaceImportRunner;
 import nl.mpi.lamus.workspace.importing.WorkspaceImportRunnerFactory;
 import nl.mpi.lamus.workspace.management.WorkspaceManager;
@@ -114,12 +117,15 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         workspaceImportRunner.setWorkspace(newWorkspace);
         workspaceImportRunner.setTopNodeArchiveURI(topArchiveNodeURI);
         
-        Future<Boolean> importResult = executorService.submit(workspaceImportRunner);
+        Future<Collection<ImportProblem>> importResult = executorService.submit(workspaceImportRunner);
         
         Boolean isSuccessful = false;
         
-        try {            
-            isSuccessful = importResult.get();
+        Collection<ImportProblem> importProblems = null;
+        
+        try {
+        	importProblems = importResult.get();
+            isSuccessful = importProblems != null;
         } catch (InterruptedException iex) {
             String errorMessage = "Interruption in thread while creating workspace in node " + topArchiveNodeURI;
             failWorkspaceImport(newWorkspace, errorMessage, iex);
@@ -140,7 +146,17 @@ public class LamusWorkspaceManager implements WorkspaceManager {
         } catch (WorkspaceNotFoundException ex) {
             throw new WorkspaceImportException(ex.getMessage(), ex.getWorkspaceID(), ex);
         }
-        
+        if (!importProblems.isEmpty()) {
+        	String reportString = toReturn.getMessage();
+            for(ImportProblem problem : importProblems) {
+            	if (problem.getClass() == FileImportProblem.class)
+            		reportString += "\n" + problem.getErrorMessage().trim();
+            	else
+            		reportString += "\nLinking problem: " + problem.getErrorMessage().trim();
+            		
+            }
+        	toReturn.setMessage(reportString);
+        }
         return toReturn;
     }
     

@@ -18,6 +18,8 @@ package nl.mpi.lamus.web.components;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import nl.mpi.lamus.exception.MetadataValidationException;
 import nl.mpi.lamus.exception.WorkspaceAccessException;
 import nl.mpi.lamus.exception.WorkspaceExportException;
@@ -131,23 +133,39 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         } catch(WorkspaceNotFoundException | WorkspaceAccessException ex) {
             Session.get().error(ex.getMessage());
         } catch(MetadataValidationException ex) {
-            StringBuilder errorMessage = new StringBuilder();
-            StringBuilder warnMessage = new StringBuilder();
             StringBuilder logMessage = new StringBuilder();
+            
+            Collection<String> errors = new ArrayList<String>();
+            Collection<String> warns = new ArrayList<String>();
+
             for(MetadataValidationIssue issue : ex.getValidationIssues()) {
 
                 // the errors are shown in the top of the list, followed by the warnings
                 if(MetadataValidationIssueSeverity.ERROR.equals(issue.getSeverity())) {
-                    errorMessage.append(issue.toString()).append(" ");
+                	errors.add(issue.toString());
                 } else {
-                    warnMessage.append(issue.toString()).append(" ");
+                	warns.add(issue.toString());
                 }
                 
                 logMessage.append(issue.toString()).append(" ");
             }
-            
-            Session.get().error("Validation errors: " + errorMessage);
-            Session.get().warn("Validation warnings: " + warnMessage);
+
+            if (!errors.isEmpty()) {
+        		String errorsHTMLstring = "Validation errors: <ul>";
+                for (String error : errors) {
+                	errorsHTMLstring += "<li>" + error + "</li>";
+                }
+                errorsHTMLstring += "</ul>";
+            	Session.get().error(errorsHTMLstring);
+            }
+            if (!warns.isEmpty()) {
+            	String warningsHTMLstring = "Validation warnings: <ul>";
+                for (String warn : warns) {
+                	warningsHTMLstring += "<li>" + warn + "</li>";
+                }
+                warningsHTMLstring += "</ul>";
+            	Session.get().warn(warningsHTMLstring);
+            }
             logger.error("Validation errors/warnings: " + logMessage);
             
             showInitialPage = false;

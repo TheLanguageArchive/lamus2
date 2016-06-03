@@ -16,7 +16,6 @@
  */
 package nl.mpi.lamus.metadata.validation;
 
-import eu.clarin.cmdi.validator.CMDIValidatorException;
 import eu.clarin.cmdi.validator.CMDIValidatorInitException;
 import java.io.File;
 import java.util.Collection;
@@ -50,7 +49,7 @@ public interface WorkspaceFileValidator {
      * @throws MetadataValidationException 
      */
     public void triggerSchemaValidationForFile(int workspaceID, File file)
-            throws CMDIValidatorInitException, CMDIValidatorException, MetadataValidationException;
+            throws CMDIValidatorInitException, MetadataValidationException;
     
     /**
      * Checks if the given collection of issues contains any error.

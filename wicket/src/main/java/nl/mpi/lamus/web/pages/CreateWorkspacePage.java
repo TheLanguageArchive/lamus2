@@ -166,6 +166,19 @@ public class CreateWorkspacePage extends LamusPage {
 		// Request a new workspace with workspace service
                 try {
                     Workspace createdWorkspace = workspaceService.createWorkspace(currentUserId, selectedNodeURI);
+                	String wsMsg = createdWorkspace.getMessage();
+                    String[] problems = wsMsg != null ? wsMsg.split("\n") : null;
+                    if (problems != null) {
+                    	Session.get().info(problems[0]);
+                    	if (problems.length > 1) {
+                    		String problemsHTMLstring = "Initialization problems: <ul>";
+                        	for (int i = 1; i < problems.length; i++) {
+                        		problemsHTMLstring += "<li>" + problems[i] + "</li>";
+                        	}
+                        	problemsHTMLstring += "</ul>";
+                        	Session.get().warn(problemsHTMLstring);
+                    	}
+                    }
                     setResponsePage(pagesProvider.getWorkspacePage(createdWorkspace));
                 } catch (NodeNotFoundException | NodeAccessException ex) {
                     Session.get().error(ex.getMessage());

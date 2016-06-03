@@ -151,11 +151,18 @@ header > ul#header_info_container > li > a:hover {
     margin-bottom:5px;
     
     width: 100%;
-    height: 20%;
+    height: 90px;
     
     overflow: scroll;
 }
 
+.feedbackPanelWARNING {
+	color: orange;
+}
+
+.feedbackPanelERROR {
+	color: red;
+}
 
 /* Navigation menu */
 

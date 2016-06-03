@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author guisil
  */
-public class WorkspaceImportRunner implements Callable<Boolean>{
+public class WorkspaceImportRunner implements Callable<Collection<ImportProblem>>{
 
     private static final Logger logger = LoggerFactory.getLogger(WorkspaceImportRunner.class);
     
@@ -72,7 +72,7 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
      * @return true if import is successful
      */
     @Override
-    public Boolean call() throws WorkspaceImportException, WorkspaceException {
+    public Collection<ImportProblem> call() throws WorkspaceImportException, WorkspaceException {
         
         if(workspace == null) {
             throw new IllegalStateException("Workspace not set");
@@ -106,6 +106,6 @@ public class WorkspaceImportRunner implements Callable<Boolean>{
             }
         }
         
-        return true;
+        return orphanImportProblems;
     }
 }

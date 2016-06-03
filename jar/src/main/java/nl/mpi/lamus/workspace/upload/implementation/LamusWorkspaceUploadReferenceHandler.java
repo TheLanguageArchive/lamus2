@@ -231,7 +231,9 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 
             } else {
                 removeReference(currentDocument, ref, currentNode);
-                String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched";
+                String fileLocation = currentDocument.getFileLocation().toString();
+                String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched. "
+                		+ "Reference removed from '" + fileLocation.substring(fileLocation.lastIndexOf(File.separator) + 1) + "'";
                 failedLinks.add(new MatchImportProblem(currentNode, ref, message, null));
             }
             

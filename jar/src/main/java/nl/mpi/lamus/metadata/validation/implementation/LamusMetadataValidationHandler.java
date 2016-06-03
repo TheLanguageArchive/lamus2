@@ -20,6 +20,8 @@ import eu.clarin.cmdi.validator.CMDIValidationHandlerAdapter;
 import eu.clarin.cmdi.validator.CMDIValidationReport;
 import eu.clarin.cmdi.validator.CMDIValidatorException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,9 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
     
     private final int workspaceID;
     
+    private Collection<String> validationWarnings = new ArrayList<String>();
+    private Collection<String> validationErrors = new ArrayList<String>();
+
     
     public LamusMetadataValidationHandler(int workspaceID) {
         this.workspaceID = workspaceID;
@@ -52,34 +57,38 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
             logger.info("DBG: file["+file+"] is valid");
             break;
         case WARNING:
-            logger.warn("WRN: file ["+file+"] is valid (with warnings):");
             for (CMDIValidationReport.Message msg : report.getMessages()) {
                 if (msg.getMessage().contains("Failed to read schema document ''")) {
                     skip++;
                     continue;
                 }
+                logger.warn("WRN: file ["+file+"] is valid (with warnings):");
+                String warningMsg = "";
                 if ((msg.getLineNumber() != -1) &&
                         (msg.getColumnNumber() != -1)) {
-                    logger.warn(" ("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]");
+                	warningMsg = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]";
                 } else {
-                    logger.warn(" ("+msg.getSeverity().getShortcut()+") "+msg.getMessage());
+                	warningMsg = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage();
                 }
+            	validationWarnings.add(warningMsg);
+            	logger.warn(warningMsg);
             }
             break;
         case ERROR:
-            logger.error("ERR: file ["+file+"] is invalid:");
             String errorMessage = "";
             for (CMDIValidationReport.Message msg : report.getMessages()) {
                 if (msg.getMessage().contains("Failed to read schema document ''")) {
                     skip++;
                     continue;
                 }
+                logger.error("ERR: file ["+file+"] is invalid:");
                 if ((msg.getLineNumber() != -1) &&
                         (msg.getColumnNumber() != -1)) {
-                	errorMessage = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]";
+                	errorMessage = "("+msg.getSeverity().getShortcut()+") "+msg.getMessage()+" [line="+msg.getLineNumber()+", column="+msg.getColumnNumber()+"]";
                 } else {
-                	errorMessage = " ("+msg.getSeverity().getShortcut()+") "+msg.getMessage();
+                	errorMessage = "("+msg.getSeverity().getShortcut()+") "+msg.getMessage();
                 }
+                validationErrors.add(errorMessage);
                 logger.error(errorMessage);
             }
             
@@ -94,4 +103,12 @@ public class LamusMetadataValidationHandler extends CMDIValidationHandlerAdapter
             logger.warn("WRN: skipped ["+skip+"] warnings due to lax validation of foreign namespaces");
         }
     }
+
+	public Collection<String> getValidationWarnings() {
+		return validationWarnings;
+	}
+	
+	public Collection<String> getValidationErrors() {
+		return validationErrors;
+	}
 }

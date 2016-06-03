@@ -60,6 +60,7 @@ public class LamusPage extends WebPage implements IAjaxIndicatorAware{
         feedbackPanel = new FeedbackPanel("feedbackPanel");
         feedbackPanel.setOutputMarkupId(true);
         feedbackPanel.setOutputMarkupPlaceholderTag(true);
+        feedbackPanel.setEscapeModelStrings(false);
         
         add(feedbackPanel);
         
