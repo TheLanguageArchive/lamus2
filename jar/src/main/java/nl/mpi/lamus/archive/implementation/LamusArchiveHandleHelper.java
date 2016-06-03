@@ -88,12 +88,12 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
     public void deleteArchiveHandleFromServerAndFile(WorkspaceNode node, URL currentLocation)
             throws HandleException, IOException, TransformerException, MetadataException {
         
-        handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
-        
         //the handle is not deleted from the database because it will still be needed
         
         if(nodeUtil.isNodeMetadata(node)) {
             metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);
         }
+        handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
+
     }
 }

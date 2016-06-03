@@ -197,7 +197,8 @@ public class LamusArchiveHandleHelperTest {
         final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER);
         
         context.checking(new Expectations() {{
-            
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location);
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(archiveHandle));
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl); will(throwException(expectedException));
         }});
@@ -221,7 +222,9 @@ public class LamusArchiveHandleHelperTest {
         final IOException expectedException = new IOException("some exception message");
         
         context.checking(new Expectations() {{
-            
+        	
+            oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
+            oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location);
             oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(archiveHandle));
             oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl); will(throwException(expectedException));
         }});
@@ -246,8 +249,6 @@ public class LamusArchiveHandleHelperTest {
         
         context.checking(new Expectations() {{
             
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(archiveHandle));
-            oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
@@ -271,9 +272,6 @@ public class LamusArchiveHandleHelperTest {
         final MetadataException expectedException = new MetadataException("some exception message");
         
         context.checking(new Expectations() {{
-            
-            oneOf(mockWorkspaceNode).getArchiveURI(); will(returnValue(archiveHandle));
-            oneOf(mockHandleManager).deleteHandle(archiveHandleWithoutHdl);
             oneOf(mockNodeUtil).isNodeMetadata(mockWorkspaceNode); will(returnValue(Boolean.TRUE));
             oneOf(mockMetadataApiBridge).removeSelfHandleAndSaveDocument(location); will(throwException(expectedException));
         }});
