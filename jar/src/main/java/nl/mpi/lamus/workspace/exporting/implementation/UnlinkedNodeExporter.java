@@ -41,6 +41,7 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -231,6 +232,10 @@ public class UnlinkedNodeExporter implements NodeExporter{
         try {
             Reference currentReference = referencingParentDocument.getDocumentReferenceByLocation(currentNodeOldUri);
             
+            if (currentReference == null) {
+                currentReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI((CMDIDocument) referencingParentDocument, currentNodeOldUri);
+            }
+
             if(filename == null) {
                 referencingParentDocument.removeDocumentReference(currentReference);
                 return;
