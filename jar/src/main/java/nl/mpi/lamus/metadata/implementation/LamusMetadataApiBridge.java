@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.metadata.implementation;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,23 +33,31 @@ import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
+import nl.mpi.metadata.api.MetadataElementException;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HandleCarrier;
 import nl.mpi.metadata.api.model.HeaderInfo;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.MetadataElement;
+import nl.mpi.metadata.api.model.MetadataField;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.api.type.ControlledVocabularyItem;
+import nl.mpi.metadata.api.type.ControlledVocabularyMetadataType;
+import nl.mpi.metadata.api.type.MetadataElementType;
 import nl.mpi.metadata.cmdi.api.CMDIConstants;
 import nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElement;
 import nl.mpi.metadata.cmdi.api.model.CMDIMetadataElementFactory;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
+import nl.mpi.metadata.cmdi.api.type.CMDIProfileElement;
 import nl.mpi.metadata.cmdi.api.type.ComponentType;
 import org.apache.commons.io.FileUtils;
+import org.apache.xmlbeans.SchemaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -352,7 +361,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
      * @see MetadataApiBridge#createComponentPathWithin(nl.mpi.metadata.cmdi.api.model.CMDIContainerMetadataElement, java.lang.String)
      */
     @Override
-    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
+    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path, WorkspaceNode node)
             throws MetadataException {
         
         CMDIMetadataElement child;
@@ -376,6 +385,9 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             
             if(child == null) {
                 child = metadataElementFactory.createNewMetadataElement(currentParent, currentType);
+                
+                createMandatoryChildrenOnElement(currentType, child, node);
+                
                 currentParent.addChildElement(child);
             }
             if(child instanceof CMDIContainerMetadataElement) {
@@ -477,6 +489,69 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         return child.getDisplayValue();
     }
     
+    
+    private void createMandatoryChildrenOnElement(ComponentType type, CMDIMetadataElement element, WorkspaceNode node) 
+    		throws MetadataElementException {
+    	CMDIContainerMetadataElement parent = (CMDIContainerMetadataElement) element;
+    	List<MetadataElementType> children = type.getContainableTypes();
+        for (MetadataElementType child : children) {
+        	if (((CMDIProfileElement) child).getMinOccurences() > 0) {
+            	CMDIMetadataElement childMetadataElement = metadataElementFactory.createNewMetadataElement(parent, (CMDIProfileElement) child);
+            	String value = null;
+            	if (((CMDIProfileElement) child).getSchemaElement().getType().getContentType() == SchemaType.ELEMENT_CONTENT) {
+            		createMandatoryChildrenOnElement(type, childMetadataElement, node);
+            	} else {
+            		switch (child.getName()) {
+            		case "Format":
+            			value = node.getFormat();
+            			break;
+            		case "Name":
+            			value = node.getName();
+            			break;
+            		case "Type":
+            			WorkspaceNodeType resourceType = node.getType();
+            			switch (resourceType) {
+            			case RESOURCE_AUDIO:
+            				value = "audio";
+            				break;
+            			case RESOURCE_IMAGE:
+            				value = "image";
+            				break;
+            			case RESOURCE_WRITTEN:
+            				value = "text";
+            				break;
+            			case RESOURCE_VIDEO:
+            				value = "video";
+            				break;
+            			default:
+            				value = "Unknown";
+            				break;
+            			}
+            			break;
+            		case "Size":
+            			File file;
+            			try {
+            				file = new File(node.getWorkspaceURL().toURI());
+            				value = Long.toString(file.length());
+            			} catch (URISyntaxException e) {
+            				logger.error("Unable to calculate file size!");
+            			}
+            			break;
+            		default:
+            			if (((CMDIProfileElement) child).getSchemaElement().getDefaultValue() != null) {
+            				value = ((CMDIProfileElement) child).getSchemaElement().getDefaultValue().getStringValue();
+            			} else if (childMetadataElement.getType() instanceof ControlledVocabularyMetadataType) {
+            				List<ControlledVocabularyItem> possibleValues = ((ControlledVocabularyMetadataType) childMetadataElement.getType()).getItems();
+            				value = possibleValues.get(possibleValues.size() - 1).getValue();
+            			}
+            		}
+                	if (value != null)
+                		((MetadataField) childMetadataElement).setValue(value);
+                	parent.addChildElement(childMetadataElement);
+            	}
+        	}
+        }
+    }
     
     private boolean isReferenceTypeAllowedInProfile(String referenceTypeToCheck, URI profileLocation) {
         

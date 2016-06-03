@@ -437,7 +437,7 @@ public class LamusWorkspaceNodeLinkManager implements WorkspaceNodeLinkManager {
         }
         CMDIContainerMetadataElement component = null;
         try {
-            component = metadataApiBridge.createComponentPathWithin(parentDocument, componentName);
+            component = metadataApiBridge.createComponentPathWithin(parentDocument, componentName, childNode);
         } catch (MetadataException ex) {
             String errorMessage = "Error assuring existance of path [" + componentName + "] in document " + parentDocument.getName();
             throwWorkspaceException(errorMessage, parentNode.getWorkspaceID(), ex);

@@ -37,6 +37,7 @@ import nl.mpi.lamus.cmdi.profile.AllowedCmdiProfiles;
 import nl.mpi.lamus.cmdi.profile.CmdiProfile;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataAPI;
 import nl.mpi.metadata.api.MetadataDocumentException;
@@ -128,6 +129,7 @@ public class LamusMetadataApiBridgeTest {
     @Mock MetadataContainer<CMDIMetadataElement> mockCmdiContainer;
     @Mock MetadataElement mockMetadataElement;
     @Mock MetadataElementType mockMetadataElementType;
+    @Mock WorkspaceNode mockWorkspaceNode;
     
     private final Map<String, String> collectionComponentsByMimetypeMap;
     private final Map<String, String> collectionComponentsByNodeTypeMap;
@@ -1153,7 +1155,7 @@ public class LamusMetadataApiBridgeTest {
             oneOf(mockCmdiContainerMetadataElement).getName(); will(returnValue(rootName));
         }});
         
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath, mockWorkspaceNode);
         
         assertEquals("Retrieved element different from expected", mockCmdiContainerMetadataElement, retrievedElement);
     }
@@ -1173,9 +1175,10 @@ public class LamusMetadataApiBridgeTest {
             oneOf(mockComponentType).getType(elementName); will(returnValue(mockAnotherComponentType));
             oneOf(mockMetadataElementFactory).createNewMetadataElement(mockCmdiContainerMetadataElement, mockAnotherComponentType); will(returnValue(mockAnotherCmdiContainerMetadataElement));
             oneOf(mockCmdiContainerMetadataElement).addChildElement(mockAnotherCmdiContainerMetadataElement);
+            oneOf(mockAnotherComponentType).getContainableTypes();
         }});
         
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath, mockWorkspaceNode);
         
         assertEquals("Retrieved element different from expected", mockAnotherCmdiContainerMetadataElement, retrievedElement);
     }
@@ -1196,14 +1199,16 @@ public class LamusMetadataApiBridgeTest {
             oneOf(mockComponentType).getType(intermediateName); will(returnValue(mockAnotherComponentType));
             oneOf(mockCmdiContainerMetadataElement).getChildElement(intermediateName); will(returnValue(null));
             oneOf(mockMetadataElementFactory).createNewMetadataElement(mockCmdiContainerMetadataElement, mockAnotherComponentType); will(returnValue(mockAnotherCmdiContainerMetadataElement));
+            oneOf(mockAnotherComponentType).getContainableTypes();
             oneOf(mockCmdiContainerMetadataElement).addChildElement(mockAnotherCmdiContainerMetadataElement);
             
             oneOf(mockAnotherComponentType).getType(elementName); will(returnValue(mockYetAnotherComponentType));
             oneOf(mockMetadataElementFactory).createNewMetadataElement(mockAnotherCmdiContainerMetadataElement, mockYetAnotherComponentType); will(returnValue(mockYetAnotherCmdiContainerMetadataElement));
+            oneOf(mockYetAnotherComponentType).getContainableTypes();
             oneOf(mockAnotherCmdiContainerMetadataElement).addChildElement(mockYetAnotherCmdiContainerMetadataElement);
         }});
         
-        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath);
+        CMDIContainerMetadataElement retrievedElement = lamusMetadataApiBridge.createComponentPathWithin(mockCmdiContainerMetadataElement, elementPath, mockWorkspaceNode);
         
         assertEquals("Retrieved element different from expected", mockYetAnotherCmdiContainerMetadataElement, retrievedElement);
     }

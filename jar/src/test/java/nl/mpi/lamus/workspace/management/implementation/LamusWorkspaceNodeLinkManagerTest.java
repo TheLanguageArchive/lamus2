@@ -52,7 +52,6 @@ import nl.mpi.metadata.cmdi.api.model.MetadataResourceProxy;
 import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.apache.commons.io.FileUtils;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -286,7 +285,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -577,7 +576,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -642,7 +641,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildResourceReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -707,7 +706,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             oneOf(mockChildNode).getType(); will(returnValue(childType));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, null, childType, isInfoFile);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -1029,7 +1028,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -1101,7 +1100,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
             allowing(mockChildMetadataReference).getMimetype(); will(returnValue(childMimetype));
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockChildNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildMetadataReference);
                 will(returnValue(mockRetrievedResourceProxy));
@@ -2041,7 +2040,7 @@ public class LamusWorkspaceNodeLinkManagerTest {
 
             oneOf(mockMetadataApiBridge).getComponentPathForProfileAndReferenceType(parentProfileLocation, childMimetype, null, Boolean.FALSE);
                 will(returnValue(componentPath));
-            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath);
+            oneOf(mockMetadataApiBridge).createComponentPathWithin(mockParentDocument, componentPath, mockNewNode);
                 will(returnValue(mockCmdiContainerMetadataElement));
             oneOf(mockMetadataApiBridge).addReferenceInComponent(mockCmdiContainerMetadataElement, mockChildResourceReference);
                 will(returnValue(mockRetrievedResourceProxy));

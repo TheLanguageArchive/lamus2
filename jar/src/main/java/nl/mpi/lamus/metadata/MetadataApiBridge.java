@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
 import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.HeaderInfo;
@@ -177,7 +178,7 @@ public interface MetadataApiBridge {
      * @param path Relative path to the component
      * @return Element corresponding to the created component
      */
-    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path)
+    public CMDIContainerMetadataElement createComponentPathWithin(CMDIContainerMetadataElement root, String path, WorkspaceNode node)
             throws MetadataException;
 
     /**
