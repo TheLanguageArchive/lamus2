@@ -53,7 +53,6 @@ import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
 import nl.mpi.metadata.api.type.MetadataElementType;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -1444,6 +1443,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 oneOf(mockDocument).getFileLocation(); will(returnValue(documentLocation));
                 oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(documentLocationFile); will(returnValue(mockStreamResult));
                 oneOf(mockMetadataAPI).writeMetadataDocument(mockDocument, mockStreamResult);
+                
+                allowing(mockMetadataDocument).getFileLocation(); will(returnValue(documentLocation));
 
                 //logger / message
                 allowing(mockReference).getURI(); will(returnValue(referenceUri));
@@ -1454,6 +1455,8 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
                 //reference without matches is not removed because an exception is thrown
                 oneOf(mockDocument).removeDocumentReference(mockReference);
                     will(throwException(exceptionToThrow));
+                oneOf(mockMetadataDocument).getFileLocation(); will(returnValue(URI.create("file:/some/other/location/file.cmdi")));
+
                 //for logging
                 exactly(2).of(mockReference).getURI(); will(returnValue(referenceUri));
                 exactly(2).of(mockNode).getWorkspaceNodeID(); will(returnValue(mockNodeID));
