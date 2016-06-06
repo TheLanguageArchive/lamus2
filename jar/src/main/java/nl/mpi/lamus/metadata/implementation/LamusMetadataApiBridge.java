@@ -531,10 +531,16 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             		case "Size":
             			File file;
             			try {
-            				file = new File(node.getWorkspaceURL().toURI());
+            				if (node.getWorkspaceURL() != null) {
+                				file = new File(node.getWorkspaceURL().toURI());
+            				} else if (node.getArchiveURL() != null) {
+            					file = new File(node.getArchiveURL().toURI());
+            				} else { //in case of a newly added external node, this is the only available location
+            					file = new File(node.getOriginURI());
+            	            }
             				value = Long.toString(file.length());
             			} catch (URISyntaxException e) {
-            				logger.error("Unable to calculate file size!");
+            				logger.error("Unable to calculate file size! Error getting URI of the node: " + node.getWorkspaceNodeID());
             			}
             			break;
             		default:
