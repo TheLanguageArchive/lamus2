@@ -676,7 +676,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -747,7 +747,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -819,7 +819,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -911,7 +911,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -1005,7 +1005,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -1095,7 +1095,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1180,7 +1180,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1268,7 +1268,7 @@ public class LamusWorkspaceUploaderTest {
         final String filename = "someFile.cmdi";
         final String documentName = "SomeFile";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final String uploadedFileRawHandle = UUID.randomUUID().toString();
@@ -1366,7 +1366,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1449,7 +1449,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.cmdi";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URI uploadedFileArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
@@ -1523,7 +1523,7 @@ public class LamusWorkspaceUploaderTest {
     public void processTwoUploadedFiles() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
         final URI uploadedFileURI1 = uploadedFile1.toURI();
@@ -1632,7 +1632,7 @@ public class LamusWorkspaceUploaderTest {
     public void processTwoUploadedFiles_LinkingFailed() throws IOException, WorkspaceNodeNotFoundException, URISyntaxException, WorkspaceException, NodeNotFoundException, TypeCheckerException {
         
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final String filename1 = "someFile.txt";
         final File uploadedFile1 = new File(workspaceUploadDirectory, filename1);
         final URI uploadedFileURI1 = uploadedFile1.toURI();
@@ -1789,7 +1789,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final WorkspaceNodeType fileType = WorkspaceNodeType.RESOURCE_WRITTEN;
         final String fileMimetype = "text/plain";
@@ -1851,7 +1851,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();
@@ -1919,7 +1919,7 @@ public class LamusWorkspaceUploaderTest {
         
         final String filename = "someFile.txt";
         final URI workspaceTopNodeArchiveURI = URI.create(handleProxyPlusPrefixWithSlash + UUID.randomUUID().toString());
-        final File workspaceTopNodeArchiveFile = new File("file:/archive/some/node.cmdi");
+        final File workspaceTopNodeArchiveFile = new File("/archive/some/node.cmdi");
         final File uploadedFile = new File(workspaceUploadDirectory, filename);
         final URI uploadedFileURI = uploadedFile.toURI();
         final URL uploadedFileURL = uploadedFileURI.toURL();

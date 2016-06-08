@@ -286,10 +286,10 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
-        final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
+        final File uploadDirectory = new File("/workspaces/" + workspaceID + "/upload");
         
         final String parentFilename = "parent.cmdi";
-        final URI parentFileURI = new URI(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
+        final URI parentFileURI = new URI(uploadDirectory.toURI() + File.separator + parentFilename);
         final URL parentFileURL = parentFileURI.toURL();
 
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
@@ -323,10 +323,10 @@ public class LamusWorkspaceUploadHelperTest {
     @Test
     public void assureLinksArchiveExternalPidResourceReference() throws URISyntaxException, MalformedURLException, IOException, MetadataException, WorkspaceException {
         
-        final File uploadDirectory = new File("file:/workspaces/" + workspaceID + "/upload");
+        final File uploadDirectory = new File("/workspaces/" + workspaceID + "/upload");
         
         final String parentFilename = "parent.cmdi";
-        final URL parentFileURL = new URL(uploadDirectory.getPath() + File.pathSeparator + parentFilename);
+        final URL parentFileURL = new URL(uploadDirectory.toURI() + File.pathSeparator + parentFilename);
 
         final Collection<WorkspaceNode> nodesToCheck = new ArrayList<>();
         nodesToCheck.add(mockChildNode);

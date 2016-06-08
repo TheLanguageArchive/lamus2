@@ -530,9 +530,9 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         final String commonPath = "parent";
         
-        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
-        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + ".cmdi");
-        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/child.txt");
+        final File wsUploadDirectory = new File("/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + commonPath + ".cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + commonPath + "/child.txt");
         
         //reference will match the second node
         final String referencePath = "parent/child.txt";
@@ -561,9 +561,9 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
-        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "Metadata" + File.separator + "parent.cmdi");
-        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "Media" + File.separator + "child.jpg");
+        final File wsUploadDirectory = new File("/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + "Metadata" + File.separator + "parent.cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + "Media" + File.separator + "child.jpg");
         
         //reference will match the second node
         final String referencePath = ".." + File.separator + "Media" + File.separator + "child.jpg";
@@ -594,9 +594,9 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         
         final String commonPath = "parent";
         
-        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
-        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + ".cmdi");
-        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + commonPath + "/different_child.txt");
+        final File wsUploadDirectory = new File("/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + commonPath + ".cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + commonPath + "/different_child.txt");
         
         //reference will match the second node
         final String referencepath = "parent/child.txt";
@@ -625,9 +625,9 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         nodesToCheck.add(mockFirstNode);
         nodesToCheck.add(mockSecondNode);
         
-        final File wsUploadDirectory = new File("file:/workspaces/upload/" + workspaceID);
-        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "parent.cmdi");
-        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.getPath() + File.separator + "different_child.txt");
+        final File wsUploadDirectory = new File("/workspaces/upload/" + workspaceID);
+        final URL firstNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + "parent.cmdi");
+        final URL secondNodeWorkspaceURL = new URL(wsUploadDirectory.toURI() + File.separator + "different_child.txt");
         
         //reference will match the second node
         final String referencepath = "child.txt";

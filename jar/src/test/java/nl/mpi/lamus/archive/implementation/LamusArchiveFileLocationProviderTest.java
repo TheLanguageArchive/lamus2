@@ -342,7 +342,7 @@ public class LamusArchiveFileLocationProviderTest {
     
     @Test
     public void fileIsInOrphansDirectory() {
-        File testFile = new File("file:/bla/bla/sessions");
+        File testFile = new File("/bla/bla/sessions");
         
         boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
         assertTrue("Result should be true", isFileInOrphansDirectory);
@@ -350,7 +350,7 @@ public class LamusArchiveFileLocationProviderTest {
     
     @Test
     public void fileIsNotInOrphansDirectory() {
-        File testFile = new File("file:/bla/bla/notthere");
+        File testFile = new File("/bla/bla/notthere");
         
         boolean isFileInOrphansDirectory = archiveFileLocationProvider.isFileInOrphansDirectory(testFile);
         assertFalse("Result should be false", isFileInOrphansDirectory);
