@@ -61,6 +61,10 @@ public class LamusWorkspaceDirectoryHandlerTest {
     @Qualifier("workspaceUploadDirectoryName")
     private String workspaceUploadDirectoryName;
     
+    @Autowired
+    @Qualifier("orphansDirectoryName")
+    private String orphansDirectoryName;
+    
     @Resource
     @Qualifier("disallowedFolderNamesWorkspace")
     private Collection<String> disallowedFolderNamesWorkspace;
@@ -226,6 +230,17 @@ public class LamusWorkspaceDirectoryHandlerTest {
     }
     
     @Test
+    public void getOrphansDirectoryInWorkspace() {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File expectedDirectory = new File(workspaceDirectory, orphansDirectoryName);
+        File retrievedDirectory = this.workspaceDirectoryHandler.getOrphansDirectoryInWorkspace(workspaceID);
+        
+        assertEquals("Retrieved directory different from expected", expectedDirectory, retrievedDirectory);
+    }
+    
+    @Test
     public void uploadDirectoryForWorkspaceNeedsToBeCreated() throws IOException {
         
         int workspaceID = 1;
@@ -274,6 +289,57 @@ public class LamusWorkspaceDirectoryHandlerTest {
 
         assertFalse("Workspace upload directory shouldn't have been created,"
                 + " since there should be no permissions for that.", workspaceUploadDirectory.exists());
+    }
+    
+    @Test
+    public void orphansDirectoryInWorkspaceNeedsToBeCreated() throws IOException {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceOrphansDirectory = new File(workspaceDirectory, this.orphansDirectoryName);
+        
+        this.workspaceDirectoryHandler.createOrphansDirectoryInWorkspace(workspaceID);
+        
+        assertTrue("Workspace orphans directory wasn't created", workspaceOrphansDirectory.exists());
+    }
+    
+    @Test
+    public void orphansDirectoryInWorkspaceAlreadyExists() throws IOException {
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        File workspaceOrphansDirectory = new File(workspaceDirectory, this.orphansDirectoryName);
+        boolean isDirectoryCreated = workspaceOrphansDirectory.mkdirs();
+        assertTrue("Workspace orphans directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Workspace orphans directory wasn't created", workspaceOrphansDirectory.exists());
+        
+        this.workspaceDirectoryHandler.createOrphansDirectoryInWorkspace(workspaceID);
+        
+        assertTrue("Workspace orphans directory wasn't created", workspaceOrphansDirectory.exists());
+    }
+    
+    @Test
+    public void throwsExceptionWhenOrphansDirectoryInWorkspaceCreationFails() throws WorkspaceFilesystemException{
+        
+        int workspaceID = 1;
+        File workspaceDirectory = new File(this.workspaceBaseDirectory, "" + workspaceID);
+        boolean isDirectoryCreated = workspaceDirectory.mkdirs();
+        assertTrue("Workspace directory was not successfuly created.", isDirectoryCreated);
+        assertTrue("Workspace directory wasn't created", workspaceDirectory.exists());
+        workspaceDirectory.setWritable(false);
+        File workspaceOrphansDirectory = new File(workspaceDirectory, this.orphansDirectoryName);
+
+        String errorMessage = "Orphans directory in workspace " + workspaceID + " could not be created";
+        
+        try {
+            this.workspaceDirectoryHandler.createOrphansDirectoryInWorkspace(workspaceID);
+            fail("Exception was not thrown");
+        } catch(IOException ex) {
+            assertEquals(errorMessage, ex.getMessage());
+        }
+
+        assertFalse("Workspace orphans directory shouldn't have been created,"
+                + " since there should be no permissions for that.", workspaceOrphansDirectory.exists());
     }
     
     @Test

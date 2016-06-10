@@ -54,6 +54,9 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
+    @Autowired
+    @Qualifier("orphansDirectoryName")
+    private String orphansDirectoryName;
     
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final WorkspaceAccessChecker workspaceAccessChecker;
@@ -177,6 +180,12 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
             try {
                 if(currentFile.isFile()) {
                     workspaceAccessChecker.ensureNodeIsNotLocked(currentFile.toURI());
+
+                    //for metadata files: create a copy in the workspace and operate that copy so the original is kept intact
+                    if(currentFile.getName().endsWith(".cmdi")) {
+                    	currentFile = copyOrphanFileToWorkspace(currentFile, workspace.getWorkspaceID());
+                    }
+                    
                     fileAvailableForWorkspace.add(currentFile);
                 }
             } catch (NodeAccessException ex) {
@@ -185,5 +194,21 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         }
         
         return fileAvailableForWorkspace;
+    }
+    
+    private File copyOrphanFileToWorkspace(File file, int workspaceID) {
+    	File workspaceDirectory = new File(workspaceBaseDirectory, workspaceID + "/" + orphansDirectoryName);
+		File destFile = null;
+		try {
+        	if (Files.isSymbolicLink(file.toPath())) {
+        		destFile = Files.readSymbolicLink(file.toPath()).toFile();
+        	} else {
+        		destFile = new File(workspaceDirectory.toString() + "/" + file.getName());
+        	}
+			Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+            logger.error("Cannot copy metadata file: [" + file.toPath() + "] to workspace directory: [" + workspaceDirectory.toString(), e);
+		}
+		return destFile;
     }
 }

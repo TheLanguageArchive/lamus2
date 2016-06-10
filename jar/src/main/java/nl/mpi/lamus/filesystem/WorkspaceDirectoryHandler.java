@@ -64,10 +64,23 @@ public interface WorkspaceDirectoryHandler {
     public File getUploadDirectoryForWorkspace(int workspaceID);
     
     /**
+     * Retrieves the orphans directory in the given workspace.
+     * @param workspaceID ID of the workspace
+     * @return File object corresponding to the orphans directory in the workspace
+     */
+    public File getOrphansDirectoryInWorkspace(int workspaceID);
+    
+    /**
      * Creates upload directory for the given workspace
      * @param workspaceID ID of the workspace
      */
     public void createUploadDirectoryForWorkspace(int workspaceID) throws IOException;
+    
+    /**
+     * Creates orphans directory in the given workspace
+     * @param workspaceID ID of the workspace
+     */
+    public void createOrphansDirectoryInWorkspace(int workspaceID) throws IOException;
     
     /**
      * Creates directory inside the given workspace

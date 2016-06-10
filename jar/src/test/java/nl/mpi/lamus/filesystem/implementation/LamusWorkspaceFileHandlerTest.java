@@ -114,6 +114,8 @@ public class LamusWorkspaceFileHandlerTest {
     private File tempDirectory;
     private File anotherTempDirectory;
     
+    private final String orphansDirectoryName = "sessions";
+    
     @Mock private File mockArchiveFile;
     @Mock private WorkspaceNode mockWorkspaceNode;
     @Mock private Workspace mockWorkspace;
@@ -391,17 +393,24 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
-        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan1.cmdi");
-        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan2.cmdi");
+        final String orphan1FileName = "orphan1.cmdi";
+        final String orphan2FileName = "orphan2.cmdi";
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan1FileName);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan2FileName);
+        
+        final Workspace testWorkspace = createTestWorkspace();
+        final File workspaceDirectory = createTestWorkspaceDirectory(workspaceBaseDirectory, testWorkspace.getWorkspaceID());
+        final File wsOrphan1 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan1FileName);
+        final File wsOrphan2 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan2FileName);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
         fileCollection.add(mockOrphan2);
         
         final Collection<File> expectedFiles = new ArrayList<>();
-        expectedFiles.add(mockOrphan1);
-        expectedFiles.add(mockOrphan2);
+        expectedFiles.add(wsOrphan1);
+        expectedFiles.add(wsOrphan2);
         
         context.checking(new Expectations() {{
             oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
@@ -415,11 +424,22 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan1).isFile(); will(returnValue(Boolean.TRUE));
             oneOf(mockOrphan1).toURI(); will(returnValue(orphan1_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan1_Uri);
+            oneOf(mockOrphan1).getName(); will(returnValue(orphan1FileName));
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
+            oneOf(mockOrphan1).toPath(); 
+            oneOf(mockOrphan1).getName(); will(returnValue(orphan1FileName));
+            exactly(2).of(mockOrphan1).toPath();
             
             //second iteration
             oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
+            oneOf(mockOrphan2).toPath();
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
+            exactly(2).of(mockOrphan2).toPath();
+
         }});
         
         stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
@@ -457,7 +477,7 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
         
         final Collection<File> fileCollection = new ArrayList<>();
         
@@ -486,7 +506,7 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
         
         //file is directory, so it shouldn't be added to the resulting list
         
@@ -521,17 +541,22 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
         final String orphan1Filename = "orphan1.cmdi";
-        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan1Filename);
-        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/orphan2.cmdi");
+        final String orphan2Filename = "orphan2.cmdi";
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan1Filename);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan2Filename);
+        
+        final Workspace testWorkspace = createTestWorkspace();
+        final File workspaceDirectory = createTestWorkspaceDirectory(workspaceBaseDirectory, testWorkspace.getWorkspaceID());
+        final File wsOrphan2 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan2Filename);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
         fileCollection.add(mockOrphan2);
         
         final Collection<File> expectedFiles = new ArrayList<>();
-        expectedFiles.add(mockOrphan2);
+        expectedFiles.add(wsOrphan2);
         
         final NodeAccessException exceptionToThrow = new NodeAccessException(orphan1Filename, orphan1_Uri, null);
         
@@ -552,6 +577,11 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2Filename));
+            oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
+            oneOf(mockOrphan2).toPath(); 
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2Filename));
+            exactly(2).of(mockOrphan2).toPath();
         }});
         
         stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
@@ -568,11 +598,11 @@ public class LamusWorkspaceFileHandlerTest {
         final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
         final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
         
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/sessions";
+        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
         final String orphan1Filename = "orphan1.cmdi";
-        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan1Filename);
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan1Filename);
         final String orphan2Filename = "orphan2.cmdi";
-        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + "/" + orphan2Filename);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan2Filename);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);

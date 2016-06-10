@@ -30,8 +30,10 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -69,6 +71,8 @@ public class AddedNodeExporter implements NodeExporter {
     private ArchiveFileLocationProvider archiveFileLocationProvider;
     @Autowired
     private WorkspaceFileHandler workspaceFileHandler;
+    @Autowired
+    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
     @Autowired
     private MetadataAPI metadataAPI;
     @Autowired
@@ -248,6 +252,16 @@ public class AddedNodeExporter implements NodeExporter {
         try {
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentNodeWorkspaceFile)) {
                 workspaceFileHandler.moveFile(currentNodeWorkspaceFile, nextAvailableFile);
+                if (currentNodeWorkspaceFile.getAbsolutePath().startsWith(workspaceDirectoryHandler.getOrphansDirectoryInWorkspace(workspaceID).getPath() + "/")) {
+                	//file originally copied from the orphans directory. Remove unedited original
+                	File original;
+					try {
+						original = new File(archiveFileLocationProvider.getOrphansDirectory(workspaceDao.getWorkspace(workspaceID).getTopNodeArchiveURL().toURI()), currentNodeWorkspaceFile.getName());
+	                	workspaceFileHandler.deleteFile(original);
+					} catch (URISyntaxException ex) {
+			            logger.error("Could not delete original metadata file from orphans directory. Problem while trying to get the directory location: ", ex);
+					}
+                }
             } else {
                 if(nodeUtil.isNodeMetadata(currentNode)) {
                     metadataApiBridge.saveMetadataDocument(currentDocument, nextAvailableFile.toURI().toURL());
@@ -255,7 +269,7 @@ public class AddedNodeExporter implements NodeExporter {
                     workspaceFileHandler.copyFile(currentNodeWorkspaceFile, nextAvailableFile);
                 }
             }
-        } catch (IOException | TransformerException | MetadataException ex) {
+        } catch (IOException | TransformerException | MetadataException | WorkspaceNotFoundException ex) {
             String errorMessage = "Error writing file for node " + currentNode.getWorkspaceURL();
             throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }

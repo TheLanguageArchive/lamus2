@@ -49,6 +49,12 @@ public class LamusFilesystemTestProperties {
     }
     
     @Bean
+    @Qualifier("orphansDirectoryName")
+    public String orphansDirectoryName() {
+        return "sessions";
+    }
+    
+    @Bean
     @Qualifier("disallowedFolderNamesWorkspace")
     public Collection<String> disallowedFolderNamesWorkspace() {
         Collection<String> folderNames = new ArrayList<>();

@@ -52,6 +52,10 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     @Qualifier("workspaceUploadDirectoryName")
     private String workspaceUploadDirectoryName;
     
+    @Autowired
+    @Qualifier("orphansDirectoryName")
+    private String orphansDirectoryName;
+    
     @Resource
     @Qualifier("disallowedFolderNamesWorkspace")
     private Collection<String> disallowedFolderNamesWorkspace;
@@ -123,6 +127,15 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
     }
     
     /**
+     * @see WorkspaceDirectoryHandler#getOrphansDirectoryInWorkspace(int)
+     */
+    @Override
+    public File getOrphansDirectoryInWorkspace(int workspaceID) {
+        File workspaceDirectory = this.getDirectoryForWorkspace(workspaceID);
+        return new File(workspaceDirectory, this.orphansDirectoryName);
+    }
+    
+    /**
      * @see WorkspaceDirectoryHandler#createUploadDirectoryForWorkspace(int)
      */
     @Override
@@ -136,6 +149,25 @@ public class LamusWorkspaceDirectoryHandler implements WorkspaceDirectoryHandler
                 logger.info("Upload directory for workspace " + workspaceID + " successfully created");
             } else {
                 String errorMessage = "Upload directory for workspace " + workspaceID + " could not be created";
+                throw new IOException(errorMessage);
+            }
+        }
+    }
+    
+    /**
+     * @see WorkspaceDirectoryHandler#createOrphansDirectoryInWorkspace(int)
+     */
+    @Override
+    public void createOrphansDirectoryInWorkspace(int workspaceID) throws IOException {
+        File workspaceOrphansDirectory = getOrphansDirectoryInWorkspace(workspaceID);
+        
+        if(workspaceOrphansDirectory.exists()) {
+            logger.info("Orphans directory in workspace " + workspaceID + " already exists");
+        } else {
+            if(workspaceOrphansDirectory.mkdirs()) {
+                logger.info("Orphans directory in workspace " + workspaceID + " successfully created");
+            } else {
+                String errorMessage = "Orphans directory in workspace " + workspaceID + " could not be created";
                 throw new IOException(errorMessage);
             }
         }
