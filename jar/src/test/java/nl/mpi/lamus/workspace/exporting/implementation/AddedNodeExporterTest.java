@@ -32,8 +32,10 @@ import nl.mpi.handle.util.HandleManager;
 import nl.mpi.handle.util.HandleParser;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.exception.WorkspaceExportException;
+import nl.mpi.lamus.exception.WorkspaceNotFoundException;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.exporting.ExporterHelper;
 import nl.mpi.lamus.workspace.exporting.NodeExporter;
@@ -63,7 +65,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Rule;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.lib.concurrent.Synchroniser;
 import static org.junit.Assert.*;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -81,6 +82,7 @@ public class AddedNodeExporterTest {
     
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock MetadataAPI mockMetadataAPI;
     @Mock WorkspaceDao mockWorkspaceDao;
     @Mock WorkspaceTreeExporter mockWorkspaceTreeExporter;
@@ -112,6 +114,8 @@ public class AddedNodeExporterTest {
     
     private final String handleHdlPrefix = "hdl:" + "11142" + "/";
     
+    private final String orphansDirectory = "sessions";
+    private File wsOrphansDirectory;
     
     public AddedNodeExporterTest() {
     }
@@ -125,11 +129,12 @@ public class AddedNodeExporterTest {
     }
     
     @Before
-    public void setUp() {
+    public void setUp() throws MalformedURLException {
         
         addedNodeExporter = new AddedNodeExporter();
         ReflectionTestUtils.setField(addedNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
         ReflectionTestUtils.setField(addedNodeExporter, "workspaceFileHandler", mockWorkspaceFileHandler);
+        ReflectionTestUtils.setField(addedNodeExporter, "workspaceDirectoryHandler", mockWorkspaceDirectoryHandler);
         ReflectionTestUtils.setField(addedNodeExporter, "metadataAPI", mockMetadataAPI);
         ReflectionTestUtils.setField(addedNodeExporter, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(addedNodeExporter, "workspaceTreeExporter", mockWorkspaceTreeExporter);
@@ -141,9 +146,10 @@ public class AddedNodeExporterTest {
         ReflectionTestUtils.setField(addedNodeExporter, "nodeUtil", mockNodeUtil);
         ReflectionTestUtils.setField(addedNodeExporter, "exporterHelper", mockExporterHelper);
         
-        testWorkspace = new LamusWorkspace(1, "someUser", -1, null, null,
+        testWorkspace = new LamusWorkspace(1, "someUser", -1, null, URI.create("file:/archive/Root/SomeNode/currentNode").toURL(),
                 Calendar.getInstance().getTime(), null, Calendar.getInstance().getTime(), null,
                 0L, 10000L, WorkspaceStatus.SUBMITTED, "Workspace submitted", "");
+        wsOrphansDirectory = new File("/workspace/" + testWorkspace.getWorkspaceID() + File.separator, orphansDirectory);
     }
     
     @After
@@ -189,7 +195,7 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportUploadedResourceNodeWithParentInArchive()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, WorkspaceExportException, TransformerException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -262,7 +268,7 @@ public class AddedNodeExporterTest {
     }
     
     @Test
-    public void exportUploadedResourceNodeWithParentNOTInArchive() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException {
+    public void exportUploadedResourceNodeWithParentNOTInArchive() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -336,7 +342,7 @@ public class AddedNodeExporterTest {
     }
     
     @Test
-    public void exportUploadedResourceNodeWithParentNOTInArchive_FileInOrphansFolder() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException {
+    public void exportUploadedResourceNodeWithParentNOTInArchive_FileInOrphansFolder() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -410,8 +416,81 @@ public class AddedNodeExporterTest {
     }
     
     @Test
+    public void exportUploadedMetadataNodeWithParentNOTInArchive_FileInOrphansFolder() throws URISyntaxException, MalformedURLException, IOException, WorkspaceExportException, MetadataException, HandleException, TransformerException, WorkspaceNotFoundException {
+        
+        final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
+        final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
+
+        WorkspaceNode node = getCurrentMetadataNode();
+        node.setWorkspaceURL(new URL("file:/workspace/" + testWorkspace.getWorkspaceID() + "/" + orphansDirectory + "/" + "sessionNode." + metadataExtension));
+        
+        final WorkspaceNode currentNode = node;
+        final String parentNodeName = "ParentNode";
+        final WorkspaceNode parentNode = getParentNode_Metadata(Boolean.TRUE, parentNodeName);
+        final String parentCorpusNamePathToClosestTopNode = "TopNode/GrandParentNode";
+        
+        final boolean isFileInOrphansFolder = Boolean.TRUE;
+        final boolean isFileMetadata = Boolean.TRUE;
+        final URL nodeWsURL = currentNode.getWorkspaceURL();
+        final String nodeWsPath = nodeWsURL.getPath();
+        final File nodeWsFile = new File(nodeWsURL.getPath());
+        final String nodeWsFilename = FilenameUtils.getName(nodeWsPath);
+        final String nextAvailableFilePath = "file:/archive/TopNode/GrandParentNode/Metadata/" + nodeWsFilename;
+        final File nextAvailableFile = new File(URI.create(nextAvailableFilePath));
+        final URL nodeNewArchiveURL = nextAvailableFile.toURI().toURL();
+        final URI nodeNewArchiveUrlToUri = nodeNewArchiveURL.toURI();
+        final URI nodeNewArchiveUriToUriHttpsRoot = new URI("https://server/archive/TopNode/GrandParentNode/Metadata/" + nodeWsFilename);
+        final String currentCorpusNamePathToClosestTopNode = "TopNode/GrandParentNode";
+        
+        final URL parentNodeArchiveURL = parentNode.getArchiveURL();
+        final File parentNodeArchiveFile = new File(parentNodeArchiveURL.toURI());
+        final String parentNodeArchivePath = parentNodeArchiveFile.getAbsolutePath();
+        final URL parentNodeWsURL = parentNode.getWorkspaceURL();
+        final File parentNodeWsFile = new File(parentNodeWsURL.getPath());
+        
+        final String childPathRelativeToParent = "../Metadata/" + nodeWsFilename;
+        
+        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+                
+        context.checking(new Expectations() {{
+            allowing(mockChildWsNode).getWorkspaceURL(); will(returnValue(nodeWsURL));
+            allowing(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentNodeWsURL));
+            
+            allowing(mockNodeUtil).isNodeMetadata(mockChildWsNode); will(returnValue(isFileMetadata));
+        }});
+        
+        checkLoggerInvocations(parentNode.getWorkspaceNodeID(), currentNode.getWorkspaceNodeID());
+        
+        
+        checkParentPathRetrieval(Boolean.FALSE, parentNode.getArchiveURI(), parentNodeArchiveFile, parentNodeArchiveURL);
+        
+        checkCorpusNamePathToClosestTopNode(mockChildWsNode, mockParentWsNode, parentCorpusNamePathToClosestTopNode, Boolean.FALSE, currentCorpusNamePathToClosestTopNode);
+        
+        checkFirstInvocations(mockChildWsNode, nodeWsFilename, nextAvailableFile, nodeNewArchiveURL, parentNodeArchivePath, parentCorpusNamePathToClosestTopNode, null);
+        
+        checkExploreInvocations(isFileMetadata, null, currentCorpusNamePathToClosestTopNode, currentNode.getName(), keepUnlinkedFiles, submissionType, exportPhase);
+        
+        checkRetrieveMetadataDocumentInvocations(isFileMetadata, nodeWsURL, null);
+        
+        checkHandleAssignmentInvocations(nodeNewArchiveURL, nodeWsFile,
+                nodeNewArchiveUrlToUri, nodeNewArchiveUriToUriHttpsRoot, nodeNewArchiveHandle, preparedNewArchiveHandle, null);
+        
+        checkUpdateSelfHandleInvocations(isFileMetadata, nodeNewArchiveHandle, nodeWsURL);
+        
+        checkFileMoveInvocations(isFileInOrphansFolder, isFileMetadata, nodeWsFile, nextAvailableFile);
+        
+        checkParentReferenceUpdateInvocations(nodeWsURL, nodeNewArchiveHandle, preparedNewArchiveHandle,
+                parentNodeWsURL, parentNodeWsFile, parentNodeArchiveFile,
+                nextAvailableFile, childPathRelativeToParent, null);                
+        
+        addedNodeExporter.exportNode(testWorkspace, mockParentWsNode, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+    }
+    
+    @Test
     public void exportUploadedMetadataNode_Corpus()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -485,7 +564,7 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportUploadedMetadataNode_Session()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -559,7 +638,7 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportUploadedInfoNode_ChildOfSession()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -635,7 +714,7 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportUploadedInfoNode_ChildOfCorpus()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -957,7 +1036,7 @@ public class AddedNodeExporterTest {
     
     @Test
     public void exportNodeThrowsTransformerException()
-            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException {
+            throws MalformedURLException, URISyntaxException, IOException, MetadataException, TransformerException, WorkspaceExportException, HandleException, WorkspaceNotFoundException {
         
         final URI nodeNewArchiveHandle = new URI("hdl:11142/" + UUID.randomUUID().toString().toUpperCase());
         final URI preparedNewArchiveHandle = new URI(handleHdlPrefix + nodeNewArchiveHandle.toString());
@@ -1200,14 +1279,23 @@ public class AddedNodeExporterTest {
     
     private void checkFileMoveInvocations(
             final boolean isFileInOrphansFolder, final boolean isMetadata,
-            final File nodeWsFile, final File nextAvailableFile) throws IOException, WorkspaceExportException, MetadataException, TransformerException {
-        
+            final File nodeWsFile, final File nextAvailableFile) throws IOException, WorkspaceExportException, MetadataException, TransformerException, WorkspaceNotFoundException, URISyntaxException {
+    	
         context.checking(new Expectations() {{
             
             oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(nodeWsFile); will(returnValue(isFileInOrphansFolder));
         
             if(isFileInOrphansFolder) {
                 oneOf(mockWorkspaceFileHandler).moveFile(nodeWsFile, nextAvailableFile);
+                oneOf(mockWorkspaceDirectoryHandler).getOrphansDirectoryInWorkspace(testWorkspace.getWorkspaceID()); will(returnValue(wsOrphansDirectory));
+                if(isMetadata) {
+                    final File orphansDirectoryFile = new File(testWorkspace.getTopNodeArchiveURL().toString() + "/" + orphansDirectory);
+                    final File fileToDelete = new File(orphansDirectoryFile, nodeWsFile.getName());
+                    oneOf(mockWorkspaceDao).getWorkspace(testWorkspace.getWorkspaceID()); will(returnValue(testWorkspace));
+                    oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(testWorkspace.getTopNodeArchiveURL().toURI());
+                    	will(returnValue(orphansDirectoryFile)); 
+                    oneOf(mockWorkspaceFileHandler).deleteFile(fileToDelete);
+                }
             } else {
                 if(isMetadata) {
                     oneOf(mockMetadataApiBridge).saveMetadataDocument(mockChildCmdiDocument, nextAvailableFile.toURI().toURL());
