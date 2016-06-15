@@ -167,13 +167,7 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
     
     private void updateHandleLocation(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
-        if(WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
-            try {
-                archiveHandleHelper.deleteArchiveHandleFromServerAndFile(currentNode, currentNode.getArchiveURL());
-            } catch (HandleException | IOException | TransformerException | MetadataException ex) {
-                logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
-            }
-        } else if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
+    	if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) || WorkspaceNodeStatus.DELETED.equals(currentNode.getStatus())) {
             URI newTargetUri = null;
             try {
                  newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
@@ -189,7 +183,8 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
                 String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
                 throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
-            
+        } else {
+        	logger.error("Cannot update handle for this node. Node status must be 'DELETED' or 'REPLACED' but was: '" + currentNode.getStatus() + "'");
         }
     }
     

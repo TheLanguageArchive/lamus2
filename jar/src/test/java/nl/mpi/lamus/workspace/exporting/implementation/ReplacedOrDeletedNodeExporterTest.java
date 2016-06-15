@@ -46,7 +46,6 @@ import nl.mpi.lamus.workspace.model.WorkspaceSubmissionType;
 import nl.mpi.lamus.workspace.model.implementation.LamusWorkspace;
 import nl.mpi.metadata.api.MetadataException;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
@@ -193,6 +192,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
@@ -202,6 +202,9 @@ public class ReplacedOrDeletedNodeExporterTest {
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
         
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
+        final String testNodeVersionArchivePath = testNodeVersionArchiveURL.getPath();
+        final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/trash/r_node.txt");
         
         context.checking(new Expectations() {{
             
@@ -223,8 +226,11 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL);
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());            
         }});
         
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
@@ -235,6 +241,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.cmdi");
@@ -243,6 +250,10 @@ public class ReplacedOrDeletedNodeExporterTest {
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        final String testNodeVersionArchivePath = testNodeVersionArchiveURL.getPath();;
+        final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/trash/r_node.cmdi");
         
         context.checking(new Expectations() {{
             
@@ -264,8 +275,12 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL);
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
             
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI());
+
         }});
         
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
@@ -499,16 +514,22 @@ public class ReplacedOrDeletedNodeExporterTest {
         
         final int testWorkspaceNodeID = 10;
         final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final URI testNodeArchiveURIWithoutHdl = new URI(testNodeArchiveURI.getSchemeSpecificPart());
         final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.DELETED;
         final boolean isNodeProtected = Boolean.FALSE;
         final URL testNodeVersionArchiveURL = new URL("file:/trash/location/r_node.txt");
         final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
         
-        final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
-        
         final boolean keepUnlinkedFiles = Boolean.TRUE; //not used in this exporter
         final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
         final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.UNLINKED_NODES_EXPORT;
+        
+        final HandleException expectedException = new HandleException(HandleException.CANNOT_CONNECT_TO_SERVER, "some exception message");
+        final String expectedExceptionMessage = "Error updating handle for node " + testNodeVersionArchiveURL;
+        
+        final String testNodeVersionArchivePath = testNodeVersionArchiveURL.getPath();
+        final File testNodeVersionArchiveFile = new File(testNodeVersionArchivePath);
+        final URL testNodeVersionArchiveHttpsUrl = new URL("https:/remote/archive/trash/r_node.txt");
         
         context.checking(new Expectations() {{
             
@@ -530,13 +551,22 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockChildWsNode);
             
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockChildWsNode, testNodeVersionArchiveURL); will(throwException(expectedException));
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(testNodeVersionArchiveURL.toURI()); will(returnValue(testNodeVersionArchiveHttpsUrl.toURI()));
+            
+            oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(testNodeVersionArchiveFile, testNodeArchiveURIWithoutHdl, testNodeVersionArchiveHttpsUrl.toURI()); will(throwException(expectedException));
             //logger
             oneOf(mockChildWsNode).getArchiveURL(); will(returnValue(testNodeVersionArchiveURL));
-
         }});
-        
-        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+       
+	    try {
+	        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+	        fail("should have thrown an exception");
+	    } catch(WorkspaceExportException ex) {
+	        assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+	        assertEquals("Exception cause different from expected", expectedException, ex.getCause());
+	    }
     }
     
     @Test
