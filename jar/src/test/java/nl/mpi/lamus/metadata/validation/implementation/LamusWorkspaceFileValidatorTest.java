@@ -116,9 +116,9 @@ public class LamusWorkspaceFileValidatorTest {
             oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID); will(returnValue(metadataNodesInTree));
             
             //loop
-            oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
+            exactly(2).of(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
+            exactly(2).of(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
+            exactly(2).of(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
             oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(returnValue(emptyIssues));
         }});
         
@@ -154,9 +154,9 @@ public class LamusWorkspaceFileValidatorTest {
             oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID); will(returnValue(metadataNodesInTree));
             
             //loop
-            oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
+            exactly(2).of(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
+            exactly(2).of(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
+            exactly(2).of(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
             oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(throwException(expectedCause));
         }});
         
@@ -203,9 +203,9 @@ public class LamusWorkspaceFileValidatorTest {
             oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID); will(returnValue(metadataNodesInTree));
             
             //loop
-            oneOf(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
-            oneOf(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
-            oneOf(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
+            exactly(2).of(mockNode_1).getWorkspaceURL(); will(returnValue(nodeUrl_1));
+            exactly(2).of(mockNode_2).getWorkspaceURL(); will(returnValue(nodeUrl_2));
+            exactly(2).of(mockNode_3).getWorkspaceURL(); will(returnValue(nodeUrl_3));
             oneOf(mockMetadataChecker).validateSubmittedFile(filesToValidate); will(returnValue(issues));
         }});
         

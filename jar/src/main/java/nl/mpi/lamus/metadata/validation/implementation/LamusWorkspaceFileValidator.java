@@ -67,8 +67,12 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         try {
             Collection<File> allFilesToValidate = new ArrayList<>();
             for(WorkspaceNode node : metadataNodesInTree) {
-                allFilesToValidate.add(new File(node.getWorkspaceURL().getPath()));
-                
+            	// External and protected node do not have WorkspaceURL
+        		if (node.getWorkspaceURL() != null) {
+            		allFilesToValidate.add(new File(node.getWorkspaceURL().getPath()));
+        		} else {
+            		allFilesToValidate.add(new File(node.getArchiveURL().getPath()));
+        		}
             }
             
             Collection<MetadataValidationIssue> issues = metadataChecker.validateSubmittedFile(allFilesToValidate);
@@ -161,7 +165,13 @@ public class LamusWorkspaceFileValidator implements WorkspaceFileValidator{
         
         Collection<WorkspaceNode> metadataNodesInTree = workspaceDao.getMetadataNodesInTreeForWorkspace(workspaceID);
         for(WorkspaceNode node : metadataNodesInTree) {
-    		File fileToValidate = new File(node.getWorkspaceURL().getPath());
+    		// External and protected node do not have WorkspaceURL
+    		File fileToValidate;
+    		if (node.getWorkspaceURL() != null) {
+    			fileToValidate = new File(node.getWorkspaceURL().getPath());
+    		} else {
+    			fileToValidate = new File(node.getArchiveURL().getPath());
+    		}
         	try {
                 triggerSchemaValidationForFile(workspaceID, fileToValidate);                
         	} catch (MetadataValidationException ex) {
