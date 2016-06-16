@@ -159,7 +159,7 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         	throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
         
-        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);;
+        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
         
         if (childArchiveURI.equals(workspace.getTopNodeArchiveURI()) && childToBeProtected) {
             String errorMessage = "Failed to create workspace. Workspace top node: [" + workspace.getTopNodeArchiveURI() + "] exists in a different branch"
