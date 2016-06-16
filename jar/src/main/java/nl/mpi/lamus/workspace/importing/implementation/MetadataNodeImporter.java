@@ -77,6 +77,9 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
     private NodeDataRetriever nodeDataRetriever;
     @Autowired
     private HandleParser handleParser;
+    @Autowired
+    private String mailBccAddress;
+
 
     
     /**
@@ -156,10 +159,13 @@ public class MetadataNodeImporter implements NodeImporter<MetadataReference> {
         	throwWorkspaceImportException(workspaceID, errorMessage, ioex);
         }
         
-        boolean childToBeProtected = false;
+        boolean childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);;
         
-        if(!childArchiveURI.equals(workspace.getTopNodeArchiveURI())) { //if child is not the top node of the workspace it can be protected
-            childToBeProtected = nodeDataRetriever.isNodeToBeProtected(childArchiveURI);
+        if (childArchiveURI.equals(workspace.getTopNodeArchiveURI()) && childToBeProtected) {
+            String errorMessage = "Failed to create workspace. Workspace top node: [" + workspace.getTopNodeArchiveURI() + "] exists in a different branch"
+            		+ " of the archive tree and currently Lamus 2 does not support edding parallel structures. In order to edit this node please contact: "
+            		+ mailBccAddress + ". Workspace ID [" + workspaceID + "]";
+            throwWorkspaceImportException(workspaceID, errorMessage, null);
         }
         
         WorkspaceNode childNode =

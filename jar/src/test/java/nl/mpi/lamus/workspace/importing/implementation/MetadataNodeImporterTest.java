@@ -190,7 +190,7 @@ public class MetadataNodeImporterTest {
                 will(returnValue(mockTestReferencingMetadataDocumentWithHandle));
             
             //top node will not be protected (if it has multiple parents, still can be changed)
-//            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL,
@@ -243,7 +243,7 @@ public class MetadataNodeImporterTest {
                 will(returnValue(mockTestNonReferencingMetadataDocumentWithHandle));
             
             //top node will not be protected (if it has multiple parents, still can be changed)
-//            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
+            oneOf(mockNodeDataRetriever).isNodeToBeProtected(testChildURI); will(returnValue(testChildProtected));
             
             oneOf(mockWorkspaceNodeFactory).getNewWorkspaceMetadataNode(
                     testWorkspace.getWorkspaceID(), testChildURI, testChildArchiveURL,
