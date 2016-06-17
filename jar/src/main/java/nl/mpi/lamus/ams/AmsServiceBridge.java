@@ -38,9 +38,9 @@ public interface AmsServiceBridge {
      * Triggers the recalculation of the resource access rights for the updated part of the archive,
      * propagate them to the Apache htaccess file and signal the webserver.
      * 
-     * @param topNode URI of the node to be recalculated
+     * @param topNodes Collection of URIs of the nodes to be recalculated
      */
-    public void triggerAccessRightsRecalculation(URI topNode);
+    public void triggerAccessRightsRecalculation(Collection<URI> topNodes);
     
     /**
      * Triggers the recalculation of the resource access rights for the updated part of the archive
@@ -50,10 +50,10 @@ public interface AmsServiceBridge {
      * So a complete recalculation is triggered for the top node and then
      * another one for the versioned nodes.
      * 
-     * @param topNode Top node for the recalculation
+     * @param topNodes Collection of URIs of the nodes to be recalculated
      * @param nodeReplacements Collection of node replacements
      */
-    public void triggerAccessRightsRecalculationWithVersionedNodes(URI topNode, Collection<WorkspaceNodeReplacement> nodeReplacements);
+    public void triggerAccessRightsRecalculationWithVersionedNodes(Collection<URI> topNodeURIs, Collection<WorkspaceNodeReplacement> nodeReplacements);
     
     /**
      * Triggers the node replacements in AMS, specifically copying and setting

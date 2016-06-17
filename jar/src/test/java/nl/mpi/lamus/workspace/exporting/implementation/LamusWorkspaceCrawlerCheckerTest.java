@@ -20,7 +20,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -28,10 +31,10 @@ import nl.mpi.lamus.exception.CrawlerStateRetrievalException;
 import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -65,6 +68,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Mock Workspace mockFailedSubmittedWorkspace;
     @Mock WorkspaceNodeReplacement mockNodeReplacement1;
     @Mock WorkspaceNodeReplacement mockNodeReplacement2;
+    @Mock WorkspaceNode mockWorkspaceNode1;
+    @Mock WorkspaceNode mockWorkspaceNode2;
+    @Mock CorpusStructureProvider mockCSProvider;
     
     
     private LamusWorkspaceCrawlerChecker workspaceCrawlerChecker;
@@ -84,7 +90,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
     @Before
     public void setUp() {
         workspaceCrawlerChecker = new LamusWorkspaceCrawlerChecker(mockWorkspaceDao,
-                mockCorpusStructureServiceBridge, mockWorkspaceMailer, mockAmsBridge);
+                mockCorpusStructureServiceBridge, mockWorkspaceMailer, mockAmsBridge, mockCSProvider);
     }
     
     @After
@@ -111,6 +117,8 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
+        final Set<URI> canoninalParents = new HashSet<URI>();
+        canoninalParents.add(topNodeURI_1);
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
@@ -140,11 +148,12 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1);
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
             oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(canoninalParents);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});
@@ -159,6 +168,10 @@ public class LamusWorkspaceCrawlerCheckerTest {
         final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
         final int workspaceID_2 = 20;
         final URI topNodeURI_2 = new URI(UUID.randomUUID().toString());
+        final Set<URI> canoninalParents1 = new HashSet<URI>();
+        canoninalParents1.add(topNodeURI_1);
+        final Set<URI> canoninalParents2 = new HashSet<URI>();
+        canoninalParents2.add(topNodeURI_2);
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
         submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
@@ -192,11 +205,12 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1);
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
             oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(canoninalParents1);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
             
@@ -213,11 +227,12 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace2).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace2).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace2);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_2);
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace2);
             
             oneOf(mockSuccessfulSubmittedWorkspace2).getTopNodeArchiveURI(); will(returnValue(topNodeURI_2));
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_2);
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(canoninalParents2);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace2, Boolean.TRUE, Boolean.TRUE);
         }});
@@ -258,6 +273,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockFailedSubmittedWorkspace).setStatus(failedStatus);
             oneOf(mockFailedSubmittedWorkspace).setMessage(failedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockFailedSubmittedWorkspace);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1); 
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockFailedSubmittedWorkspace, Boolean.FALSE, Boolean.TRUE);
         }});
@@ -270,6 +286,8 @@ public class LamusWorkspaceCrawlerCheckerTest {
         
         final int workspaceID_1 = 10;
         final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
+        final Set<URI> canoninalParents1 = new HashSet<URI>();
+        canoninalParents1.add(topNodeURI_1);
         final String userID = "someUser";
         
         final Collection<Workspace> submittedWorkspaces = new ArrayList<>();
@@ -306,6 +324,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1);
             
             oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
             
@@ -313,7 +332,83 @@ public class LamusWorkspaceCrawlerCheckerTest {
 //            oneOf(mockAmsBridge).triggerAccessRightsRecalculation(topNodeURI_1);
 //            oneOf(mockAmsBridge).triggerAccessRightsRecalculationForVersionedNodes(nodeReplacements, topNodeURI_1);
             oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
-            oneOf(mockAmsBridge).triggerAccessRightsRecalculationWithVersionedNodes(topNodeURI_1, nodeReplacements);
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculationWithVersionedNodes(canoninalParents1, nodeReplacements);
+            
+            oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
+        }});
+        
+        workspaceCrawlerChecker.checkCrawlersForSubmittedWorkspaces();
+    }
+    
+    @Test
+    public void checkCrawlersForSubmittedWorkspaces_OneSuccessfulSubmittedWorkspaceFound_WithCanonicalParents() throws InterruptedException, VersionCreationException, CrawlerStateRetrievalException, URISyntaxException {
+        
+        final int workspaceID_1 = 10;
+        final URI topNodeURI_1 = new URI(UUID.randomUUID().toString());
+        final String userID = "someUser";
+        
+        final Collection<Workspace> submittedWorkspaces = new ArrayList<Workspace>();
+        submittedWorkspaces.add(mockSuccessfulSubmittedWorkspace1);
+        
+        final String crawlerID = UUID.randomUUID().toString();
+        final String crawlerState = "SUCCESS";
+        
+        final Collection<WorkspaceNodeReplacement> nodeReplacements = new ArrayList<WorkspaceNodeReplacement>();
+        nodeReplacements.add(mockNodeReplacement1);
+        nodeReplacements.add(mockNodeReplacement2);
+        final Collection<WorkspaceNode> descendantNodes = new ArrayList<WorkspaceNode>();
+        descendantNodes.add(mockWorkspaceNode1);
+        descendantNodes.add(mockWorkspaceNode2);
+        
+        final URI wsChildNodeURI1 = new URI(UUID.randomUUID().toString());
+        final URI wsChildNodeURI2 = new URI(UUID.randomUUID().toString());
+        final Set<URI> canonicalParents = new HashSet<URI>();
+        final URI canonicalParentURI1 = new URI(UUID.randomUUID().toString());
+        final URI canonicalParentURI2 = new URI(UUID.randomUUID().toString());
+        canonicalParents.add(canonicalParentURI1);
+        canonicalParents.add(canonicalParentURI2);
+        canonicalParents.add(topNodeURI_1);
+        
+        final WorkspaceStatus successfulStatus = WorkspaceStatus.SUCCESS;
+        final String successfulMessage = "Data was successfully moved to the archive and the crawler was successful.";
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockWorkspaceDao).getWorkspacesInFinalStage(); will(returnValue(submittedWorkspaces));
+            
+            //loop
+            
+            //logger
+            allowing(mockSuccessfulSubmittedWorkspace1).getWorkspaceID(); will(returnValue(workspaceID_1));
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getCrawlerID(); will(returnValue(crawlerID));
+            oneOf(mockCorpusStructureServiceBridge).getCrawlerState(crawlerID); will(returnValue(crawlerState));
+            
+            oneOf(mockWorkspaceDao).getNodeReplacementsForWorkspace(workspaceID_1); will(returnValue(nodeReplacements));
+            oneOf(mockCorpusStructureServiceBridge).createVersions(nodeReplacements);
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getUserID(); will(returnValue(userID));
+            oneOf(mockAmsBridge).triggerAmsNodeReplacements(nodeReplacements, userID);
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(successfulStatus);
+            oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(successfulMessage);
+            oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1); will(returnValue(descendantNodes));
+            
+            oneOf(mockWorkspaceNode1).isProtected(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode1).getArchiveURI(); will(returnValue(wsChildNodeURI1));
+            oneOf(mockCSProvider).getCanonicalParent(wsChildNodeURI1); will(returnValue(canonicalParentURI1));
+            oneOf(mockWorkspaceNode1).getName();
+            
+            oneOf(mockWorkspaceNode2).isProtected(); will(returnValue(Boolean.TRUE));
+            oneOf(mockWorkspaceNode2).getArchiveURI(); will(returnValue(wsChildNodeURI2));
+            oneOf(mockCSProvider).getCanonicalParent(wsChildNodeURI2); will(returnValue(canonicalParentURI2));
+            oneOf(mockWorkspaceNode2).getName();
+            
+            oneOf(mockWorkspaceDao).cleanWorkspaceNodesAndLinks(mockSuccessfulSubmittedWorkspace1);
+
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI(); will(returnValue(topNodeURI_1));
+            oneOf(mockAmsBridge).triggerAccessRightsRecalculationWithVersionedNodes(canonicalParents, nodeReplacements);
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.TRUE);
         }});
@@ -359,6 +454,7 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).setStatus(failedStatus);
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(failedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
+            oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1); 
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.FALSE);
         }});

@@ -59,25 +59,26 @@ public class LamusAmsServiceBridge implements AmsServiceBridge {
      * @see AmsServiceBridge#triggerAccessRightsRecalculation(java.net.URI)
      */
     @Override
-    public void triggerAccessRightsRecalculation(URI topNode) {
-        
-        logger.debug("Triggering access rights recalculation for node {}", topNode);
-        
-        Collection<URI> targetURIs = new ArrayList<>();
-        targetURIs.add(topNode);
-        
-        amsRemoteService.triggerRightsRecalculation(targetURIs, true, true);
+    public void triggerAccessRightsRecalculation(Collection<URI> topNodeURIs) {
+        if (!topNodeURIs.isEmpty()) {
+            Collection<URI> targetURIs = new ArrayList<>();
+            for(URI nodeURI : topNodeURIs) {
+                logger.debug("Triggering access rights recalculation for node {}", nodeURI);
+                targetURIs.add(nodeURI);
+            }
+            amsRemoteService.triggerRightsRecalculation(targetURIs, true, true);
+        }
     }
     
     /**
      * @see AmsServiceBridge#triggerAccessRightsRecalculationWithVersionedNodes(java.net.URI, java.util.Collection)
      */
     @Override
-    public void triggerAccessRightsRecalculationWithVersionedNodes(URI topNode, Collection<WorkspaceNodeReplacement> nodeReplacements) {
+    public void triggerAccessRightsRecalculationWithVersionedNodes(Collection<URI> topNodeURIs, Collection<WorkspaceNodeReplacement> nodeReplacements) {
         
         logger.debug("Triggering access rights recalculation for top node and versioned nodes");
         
-        triggerAccessRightsRecalculation(topNode);
+        triggerAccessRightsRecalculation(topNodeURIs);
         
         Collection<URI> versionedNodes = new ArrayList<>();
         for(WorkspaceNodeReplacement replacement : nodeReplacements) {

@@ -16,7 +16,11 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.net.URI;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.ams.AmsServiceBridge;
 import nl.mpi.lamus.archive.CorpusStructureServiceBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -25,6 +29,7 @@ import nl.mpi.lamus.exception.VersionCreationException;
 import nl.mpi.lamus.workspace.exporting.WorkspaceCrawlerChecker;
 import nl.mpi.lamus.workspace.exporting.WorkspaceMailer;
 import nl.mpi.lamus.workspace.model.Workspace;
+import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lamus.workspace.model.WorkspaceStatus;
 import org.slf4j.Logger;
@@ -45,14 +50,16 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
     private final CorpusStructureServiceBridge corpusStructureServiceBridge;
     private final WorkspaceMailer workspaceMailer;
     private final AmsServiceBridge amsBridge;
+    private final CorpusStructureProvider corpusStructureProvider;
 
     @Autowired
     public LamusWorkspaceCrawlerChecker(WorkspaceDao wsDao, CorpusStructureServiceBridge csServiceBridge,
-        WorkspaceMailer wsMailer, AmsServiceBridge amsBridge) {
+        WorkspaceMailer wsMailer, AmsServiceBridge amsBridge, CorpusStructureProvider csProvider) {
         workspaceDao = wsDao;
         corpusStructureServiceBridge = csServiceBridge;
         workspaceMailer = wsMailer;
         this.amsBridge = amsBridge;
+        this.corpusStructureProvider = csProvider;
     }
     
     /**
@@ -128,15 +135,30 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         
         workspaceDao.updateWorkspaceStatusMessage(workspace);
         
+        Collection<WorkspaceNode> descendantNodes = workspaceDao.getMetadataNodesInTreeForWorkspace(workspace.getWorkspaceID());
+        
+        Set<URI> canoninalParents = new HashSet<URI>();
+        for (WorkspaceNode node : descendantNodes) {
+        	URI canonicalParent = corpusStructureProvider.getCanonicalParent(node.getArchiveURI());
+        	if (node.isProtected() && canonicalParent != null) {
+                logger.debug("Worspace child protected: [" + node.getName() + "] adding canonical parent for rights recalcualtion: [" + canonicalParent.toString() + "]");
+        		canoninalParents.add(canonicalParent);
+        	}
+        }
+        
         if(crawlerWasSuccessful && versioningWasSuccessful) {
             workspaceDao.cleanWorkspaceNodesAndLinks(workspace);
             
             logger.debug("Triggering access rigths recalculation for workspace " + workspace.getWorkspaceID());
             
+            URI topNodeArchiveURI = workspace.getTopNodeArchiveURI();
+            canoninalParents.add(topNodeArchiveURI);
+            logger.debug("Added workspace top node for rights recalculation: " + topNodeArchiveURI);
+            
             if(!nodeReplacements.isEmpty()) {
-                amsBridge.triggerAccessRightsRecalculationWithVersionedNodes(workspace.getTopNodeArchiveURI(), nodeReplacements);
+            	amsBridge.triggerAccessRightsRecalculationWithVersionedNodes(canoninalParents, nodeReplacements);
             } else {
-                amsBridge.triggerAccessRightsRecalculation(workspace.getTopNodeArchiveURI());
+            	amsBridge.triggerAccessRightsRecalculation(canoninalParents);
             }
         }
         

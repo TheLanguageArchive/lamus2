@@ -128,7 +128,7 @@ public class AmsFakeRemoteServiceHelper {
     public void sendCallToAccessRightsManagementSystem(MockableURL amsUrl)
             throws IOException {
         
-        logger.info("ams2 recalculation called by " + amsUrl);
+        logger.info("ams2 recalculation called by " + amsUrl.getURL().toString());
         
         URLConnection servletConnection = amsUrl.openConnection();
         servletConnection.setDoInput(true);

@@ -20,7 +20,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeReplacement;
 import nl.mpi.lat.ams.IAmsRemoteService;
@@ -91,6 +93,8 @@ public class LamusAmsServiceBridgeTest {
     public void triggerAccessRightsRecalculation() throws URISyntaxException {
         
         final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
+        final Set<URI> canoninalParents = new HashSet<URI>();
+        canoninalParents.add(workspaceRootNodeURI);
         
         final Collection<URI> recalculationTargetURIs = new ArrayList<>();
         recalculationTargetURIs.add(workspaceRootNodeURI);
@@ -100,13 +104,15 @@ public class LamusAmsServiceBridgeTest {
             oneOf(mockAmsRemoteService).triggerRightsRecalculation(recalculationTargetURIs, Boolean.TRUE, Boolean.TRUE);
         }});
         
-        amsServiceBridge.triggerAccessRightsRecalculation(workspaceRootNodeURI);
+        amsServiceBridge.triggerAccessRightsRecalculation(canoninalParents);
     }
     
     @Test
     public void triggerAccessRightsRecalculationWithVersionedNodes() throws URISyntaxException {
         
         final URI workspaceRootNodeURI = new URI(UUID.randomUUID().toString());
+        final Set<URI> canoninalParents = new HashSet<URI>();
+        canoninalParents.add(workspaceRootNodeURI);
         
         final Collection<URI> recalculationTargets = new ArrayList<>();
         recalculationTargets.add(workspaceRootNodeURI);
@@ -132,7 +138,7 @@ public class LamusAmsServiceBridgeTest {
             oneOf(mockAmsRemoteService).triggerRightsRecalculation(versionedNodes, Boolean.TRUE, Boolean.TRUE);
         }});
         
-        amsServiceBridge.triggerAccessRightsRecalculationWithVersionedNodes(workspaceRootNodeURI, nodeReplacementsList);
+        amsServiceBridge.triggerAccessRightsRecalculationWithVersionedNodes(canoninalParents, nodeReplacementsList);
     }
     
     @Test
