@@ -34,7 +34,6 @@ import nl.mpi.archiving.corpusstructure.provider.CorpusStructureProvider;
 import nl.mpi.lamus.util.implementation.MockableURL;
 import org.hibernate.engine.jdbc.ReaderInputStream;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -210,9 +209,11 @@ public class AmsFakeRemoteServiceHelperTest {
         final String expectedString = "some text to read and test the method and bla bla bla";
         final StringReader reader = new StringReader(expectedString);
         final InputStream fakeInputStream = new ReaderInputStream(reader);
+        final URL recalcURL = new URL("http://127.0.0.1/ams/pages/recalc.face?nodeid=MPI0%23%2CMPI1%23");
         
         context.checking(new Expectations() {{
             
+        	oneOf(mockUrl).getURL(); will(returnValue(recalcURL));
             oneOf(mockUrl).openConnection(); will(returnValue(mockUrlConnection));
             oneOf(mockUrlConnection).setDoInput(Boolean.TRUE);
             oneOf(mockUrlConnection).setDoOutput(Boolean.FALSE);
