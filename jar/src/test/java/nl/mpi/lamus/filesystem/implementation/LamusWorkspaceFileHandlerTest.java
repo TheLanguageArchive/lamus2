@@ -389,20 +389,20 @@ public class LamusWorkspaceFileHandlerTest {
     @Test
     public void getFilesInOrphanDirectory_NoneLocked() throws MalformedURLException, URISyntaxException, NodeAccessException {
         
-        final String nodeFilename = "someNode.cmdi";
-        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
-        
+        final URL topNodeArchiveURL = new URL("file:/somewhere/in/the/archive/");
         final String orphan1FileName = "orphan1.cmdi";
         final String orphan2FileName = "orphan2.cmdi";
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
+        final File orphansDirectoryFile = new File(topNodeArchiveURL.getPath(), orphansDirectoryName);
+        final String orphansDirectoryPath = orphansDirectoryFile.getPath();
         final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan1FileName);
         final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan2FileName);
+        final File orphan1_parent = new File(orphan1_Uri).getParentFile();
+        final File orphan2_parent = new File(orphan2_Uri).getParentFile();
         
         final Workspace testWorkspace = createTestWorkspace();
         final File workspaceDirectory = createTestWorkspaceDirectory(workspaceBaseDirectory, testWorkspace.getWorkspaceID());
-        final File wsOrphan1 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan1FileName);
-        final File wsOrphan2 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan2FileName);
+        final File wsOrphan1 = new File(workspaceDirectory, orphansDirectoryName + File.separator + orphan1FileName);
+        final File wsOrphan2 = new File(workspaceDirectory, orphansDirectoryName + File.separator + orphan2FileName);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
@@ -413,8 +413,8 @@ public class LamusWorkspaceFileHandlerTest {
         expectedFiles.add(wsOrphan2);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
-            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(topNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(topNodeArchiveURL.toURI()); will(returnValue(mockOrphansDirectory));
             
             oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
             //logger
@@ -426,9 +426,14 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan1_Uri);
             oneOf(mockOrphan1).getName(); will(returnValue(orphan1FileName));
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
-            oneOf(mockOrphan1).toPath(); 
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(topNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(topNodeArchiveURL.toURI()); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphan1).getParentFile(); will(returnValue(orphan1_parent));
+            oneOf(mockOrphansDirectory).toPath(); will(returnValue(orphansDirectoryFile.toPath()));
             oneOf(mockOrphan1).getName(); will(returnValue(orphan1FileName));
-            exactly(2).of(mockOrphan1).toPath();
+            oneOf(mockOrphan1).toPath();
+            oneOf(mockOrphan1).getName(); will(returnValue(orphan1FileName));
+            oneOf(mockOrphan1).toPath();
             
             //second iteration
             oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
@@ -436,9 +441,14 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
             oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(topNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(topNodeArchiveURL.toURI()); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphan2).getParentFile(); will(returnValue(orphan2_parent));
+            oneOf(mockOrphansDirectory).toPath(); will(returnValue(orphansDirectoryFile.toPath()));
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
             oneOf(mockOrphan2).toPath();
             oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
-            exactly(2).of(mockOrphan2).toPath();
+            oneOf(mockOrphan2).toPath();
 
         }});
         
@@ -536,20 +546,18 @@ public class LamusWorkspaceFileHandlerTest {
     
     @Test
     public void getFilesInOrphanDirectory_OneLocked() throws MalformedURLException, URISyntaxException, NodeAccessException {
-        
-        final String nodeFilename = "someNode.cmdi";
-        final URL archiveNodeUrl = new URL("file:/somewhere/in/the/archive/" + nodeFilename);
-        final URI archiveNodeUrlUri = archiveNodeUrl.toURI();
-        
-        final String orphansDirectoryPath = "/somewhere/in/the/archive/" + orphansDirectoryName;
-        final String orphan1Filename = "orphan1.cmdi";
-        final String orphan2Filename = "orphan2.cmdi";
-        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan1Filename);
-        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + orphan2Filename);
-        
+                
+        final URL topNodeArchiveURL = new URL("file:/somewhere/in/the/archive/");
+        final String orphan1FileName = "orphan1.cmdi";
+        final String orphan2FileName = "orphan2.cmdi";
+        final File orphansDirectoryFile = new File(topNodeArchiveURL.getPath(), orphansDirectoryName);    
+        final String orphansDirectoryPath = orphansDirectoryFile.getPath();
+        final URI orphan1_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + "subPath" + File.separator + orphan1FileName);
+        final URI orphan2_Uri = URI.create("file:" + orphansDirectoryPath + File.separator + "subPath" + File.separator + orphan2FileName);
+        final File orphan2_parent = new File(orphan2_Uri).getParentFile();
         final Workspace testWorkspace = createTestWorkspace();
         final File workspaceDirectory = createTestWorkspaceDirectory(workspaceBaseDirectory, testWorkspace.getWorkspaceID());
-        final File wsOrphan2 = new File(workspaceDirectory + File.separator + orphansDirectoryName + File.separator + orphan2Filename);
+        final File wsOrphan2 = new File(workspaceDirectory, orphansDirectoryName + File.separator + "subPath" + File.separator + orphan2FileName);
         
         final Collection<File> fileCollection = new ArrayList<>();
         fileCollection.add(mockOrphan1);
@@ -558,11 +566,11 @@ public class LamusWorkspaceFileHandlerTest {
         final Collection<File> expectedFiles = new ArrayList<>();
         expectedFiles.add(wsOrphan2);
         
-        final NodeAccessException exceptionToThrow = new NodeAccessException(orphan1Filename, orphan1_Uri, null);
+        final NodeAccessException exceptionToThrow = new NodeAccessException(orphan1FileName, orphan1_Uri, null);
         
         context.checking(new Expectations() {{
-            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(archiveNodeUrl));
-            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(archiveNodeUrlUri); will(returnValue(mockOrphansDirectory));
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(topNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(topNodeArchiveURL.toURI()); will(returnValue(mockOrphansDirectory));
             
             oneOf(mockOrphansDirectory).exists(); will(returnValue(Boolean.TRUE));
             //logger
@@ -577,11 +585,16 @@ public class LamusWorkspaceFileHandlerTest {
             oneOf(mockOrphan2).isFile(); will(returnValue(Boolean.TRUE));
             oneOf(mockOrphan2).toURI(); will(returnValue(orphan2_Uri));
             oneOf(mockWorkspaceAccessChecker).ensureNodeIsNotLocked(orphan2_Uri);
-            oneOf(mockOrphan2).getName(); will(returnValue(orphan2Filename));
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
             oneOf(mockWorkspace).getWorkspaceID(); will(returnValue(1));
-            oneOf(mockOrphan2).toPath(); 
-            oneOf(mockOrphan2).getName(); will(returnValue(orphan2Filename));
-            exactly(2).of(mockOrphan2).toPath();
+            oneOf(mockWorkspace).getTopNodeArchiveURL(); will(returnValue(topNodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).getOrphansDirectory(topNodeArchiveURL.toURI()); will(returnValue(mockOrphansDirectory));
+            oneOf(mockOrphan2).getParentFile(); will(returnValue(orphan2_parent));
+            oneOf(mockOrphansDirectory).toPath(); will(returnValue(orphansDirectoryFile.toPath()));
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
+            oneOf(mockOrphan2).toPath();
+            oneOf(mockOrphan2).getName(); will(returnValue(orphan2FileName));
+            oneOf(mockOrphan2).toPath();
         }});
         
         stub(method(FileUtils.class, "listFiles", File.class, String[].class, boolean.class)).toReturn(fileCollection);
