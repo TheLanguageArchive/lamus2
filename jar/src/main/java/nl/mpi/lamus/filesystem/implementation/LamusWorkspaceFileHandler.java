@@ -172,7 +172,12 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
 
                     //for metadata files: create a copy in the workspace and operate that copy so the original is kept intact
                     if(currentFile.getName().endsWith(".cmdi")) {
-                    	currentFile = copyOrphanFileToWorkspace(currentFile, workspace.getWorkspaceID());
+                    	try {
+							currentFile = copyOrphanFileToWorkspace(currentFile, workspace);
+						} catch (URISyntaxException e) {
+				            logger.warn("Problem while trying to copy files into the workspace orphans directory: " + e.getMessage());
+				            return new ArrayList<>();
+						}
                     }
                     
                     fileAvailableForWorkspace.add(currentFile);
@@ -196,18 +201,33 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
 		}
     }
     
-    private File copyOrphanFileToWorkspace(File file, int workspaceID) {
-    	File workspaceDirectory = new File(workspaceBaseDirectory, workspaceID + "/" + orphansDirectoryName);
+    private File copyOrphanFileToWorkspace(File file, Workspace workspace) throws URISyntaxException {
+    	File wsOrphansDirectory = new File(workspaceBaseDirectory, workspace.getWorkspaceID() + "/" + orphansDirectoryName);
+        File origOrphansDirectory = archiveFileLocationProvider.getOrphansDirectory(workspace.getTopNodeArchiveURL().toURI());
+        File destPath = new File(wsOrphansDirectory, origOrphansDirectory.toPath().relativize(file.getParentFile().toPath()).toString());
+
 		File destFile = null;
-		try {
-        	if (Files.isSymbolicLink(file.toPath())) {
-        		destFile = Files.readSymbolicLink(file.toPath()).toFile();
-        	} else {
-        		destFile = new File(workspaceDirectory.toString() + "/" + file.getName());
+		try {        	
+            //create directories
+            if(destPath.exists()) {
+                logger.info("Workspace directory: [" + destPath.toPath().toString() +"] for orphan: [" + file.getName() + "] already exists");
+            } else {
+                if(destPath.mkdirs()) {
+                    logger.info("Workspace directory: [" + destPath.toPath().toString() +"] for orphan: [" + file.getName() + "] successfully created");
+                } else {
+                    String errorMessage = "Workspace directory: [" + destPath.toPath().toString() +"] for orphan: [" + file.getName() + "] could not be created";
+                    throw new IOException(errorMessage);
+                }
+            }
+            
+            if (Files.isSymbolicLink(file.toPath())) {
+        		file = Files.readSymbolicLink(file.toPath()).toFile();
         	}
+       		destFile = new File(destPath, file.getName());
+
 			Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-            logger.error("Cannot copy metadata file: [" + file.toPath() + "] to workspace directory: [" + workspaceDirectory.toString(), e);
+            logger.error("Cannot copy metadata file: [" + file.toPath() + "] to workspace directory: [" + destPath.toString(), e);
 		}
 		return destFile;
     }

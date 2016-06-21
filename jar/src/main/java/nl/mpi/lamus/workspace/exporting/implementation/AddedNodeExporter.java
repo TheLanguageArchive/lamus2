@@ -252,12 +252,15 @@ public class AddedNodeExporter implements NodeExporter {
         try {
             if(archiveFileLocationProvider.isFileInOrphansDirectory(currentNodeWorkspaceFile)) {
                 workspaceFileHandler.moveFile(currentNodeWorkspaceFile, nextAvailableFile);
-                if (currentNodeWorkspaceFile.getAbsolutePath().startsWith(workspaceDirectoryHandler.getOrphansDirectoryInWorkspace(workspaceID).getPath() + "/")) {
+                
+                File orphansDirectoryInWS = workspaceDirectoryHandler.getOrphansDirectoryInWorkspace(workspaceID);
+                if (currentNodeWorkspaceFile.getAbsolutePath().startsWith(orphansDirectoryInWS.getAbsolutePath() + "/")) {
                 	//file originally copied from the orphans directory. Remove unedited original
                 	File original;
 					try {
-						original = new File(archiveFileLocationProvider.getOrphansDirectory(workspaceDao.getWorkspace(workspaceID).getTopNodeArchiveURL().toURI()), currentNodeWorkspaceFile.getName());
-	                	workspaceFileHandler.deleteFile(original);
+			            File orphansDirectory = archiveFileLocationProvider.getOrphansDirectory(workspaceDao.getWorkspace(workspaceID).getTopNodeArchiveURL().toURI());
+						original = new File(orphansDirectory, orphansDirectoryInWS.toPath().relativize(currentNodeWorkspaceFile.toPath()).toString());
+						workspaceFileHandler.deleteFile(original);
 					} catch (URISyntaxException ex) {
 			            logger.error("Could not delete original metadata file from orphans directory. Problem while trying to get the directory location: ", ex);
 					}
