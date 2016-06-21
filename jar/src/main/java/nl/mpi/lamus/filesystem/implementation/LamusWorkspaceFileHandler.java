@@ -88,21 +88,10 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     	if (Files.isSymbolicLink(originNodeFile.toPath())) {
     		File originLinkToNodeFile = originNodeFile;
     		originNodeFile = Files.readSymbolicLink(originNodeFile.toPath()).toFile();
-    		try {
-    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        		Files.delete(originLinkToNodeFile.toPath());
-    		} catch (AtomicMoveNotSupportedException amnse) {
-    			logger.warn("Could not perform atomic move: " + amnse.getMessage() + ". Trying regular move...");
-    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    			Files.delete(originLinkToNodeFile.toPath());
-    		}
+    		moveOrCopyFile(originNodeFile, targetNodeFile);
+    		Files.delete(originLinkToNodeFile.toPath());
     	} else {
-    		try {
-    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-    		} catch (AtomicMoveNotSupportedException amnse) {
-    			logger.warn("Could not perform atomic move: " + amnse.getMessage() + ". Trying regular move...");
-    			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-    		}
+    		moveOrCopyFile(originNodeFile, targetNodeFile);
     	}
     }
 
@@ -194,6 +183,17 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         }
         
         return fileAvailableForWorkspace;
+    }
+    
+    private void moveOrCopyFile(File originNodeFile, File targetNodeFile) 
+    		throws IOException {
+    	try {
+			Files.move(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+		} catch (AtomicMoveNotSupportedException amnse) {
+			logger.warn("Could not perform atomic move: " + amnse.getMessage() + ". Trying regular copy and delete...");
+    		Files.copy(originNodeFile.toPath(), targetNodeFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+    		deleteFile(originNodeFile);
+		}
     }
     
     private File copyOrphanFileToWorkspace(File file, int workspaceID) {
