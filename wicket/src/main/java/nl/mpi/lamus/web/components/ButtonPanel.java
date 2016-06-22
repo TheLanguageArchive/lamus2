@@ -212,11 +212,13 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         String id;
         String title;
         String cookieName;
+        String confirmationInfoText = null;
         String confirmationText;
         if(WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
             id = "modalConfirmSubmit";
             title = "Submit Workspace";
             cookieName = "modal-confirm-submit";
+            confirmationInfoText = getLocalizer().getString("submit_workspace_info", this);
             confirmationText = getLocalizer().getString("submit_workspace_confirm", this);
         } else if (WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
             id = "modalConfirmDelete";
@@ -227,7 +229,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             throw new UnsupportedOperationException("Submission type not supported");
         }
         
-        final ConfirmationOptions options = new ConfirmationOptions(false, true, submissionType, confirmationText);
+        final ConfirmationOptions options = new ConfirmationOptions(false, true, submissionType, confirmationInfoText, confirmationText);
         
         ModalWindow modalConfirm = new ModalWindow(id);
         modalConfirm.setContent(new ConfirmPanel(modalConfirm.getContentId(), modalConfirm, options));
@@ -262,13 +264,15 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         private boolean confirmed;
         private boolean keepUnlinkedFiles;
         private final WorkspaceSubmissionType submissionType;
+        private final String confirmationInfoText;
         private final String confirmationText;
         
         public ConfirmationOptions(boolean confirmed, boolean keepUnlinkedFiles,
-                WorkspaceSubmissionType type, String confirmationText) {
+                WorkspaceSubmissionType type, String confirmationInfoText, String confirmationText) {
             this.confirmed = confirmed;
             this.keepUnlinkedFiles = keepUnlinkedFiles;
             this.submissionType = type;
+            this.confirmationInfoText = confirmationInfoText;
             this.confirmationText = confirmationText;
         }
         
@@ -289,6 +293,10 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
         
         public WorkspaceSubmissionType getWorkspaceSubmissionType() {
             return submissionType;
+        }
+        
+        public String getConfirmationInfoText() {
+            return confirmationInfoText;
         }
         
         public String getConfirmationText() {

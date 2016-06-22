@@ -21,6 +21,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.basic.MultiLineLabel;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -39,6 +40,10 @@ public class ConfirmPanel extends Panel {
         super(id);
         
         Form confirmSubmitForm = new Form("confirmSubmitForm");
+        
+        MultiLineLabel infoText = new MultiLineLabel("confirmation_info_text", options.getConfirmationInfoText());
+        
+        confirmSubmitForm.add(infoText);
         
         confirmSubmitForm.add(new Label("confirmation_text", options.getConfirmationText()));
         
@@ -59,8 +64,15 @@ public class ConfirmPanel extends Panel {
         confirmSubmitForm.add(keepUnlinkedFilesCheckbox);
         
         modalWindow.setTitle("Please confirm");
-        modalWindow.setInitialHeight(200);
-        modalWindow.setInitialWidth(350);
+        
+        if (options.getConfirmationInfoText() != null && !options.getConfirmationInfoText().isEmpty()) {
+            modalWindow.setInitialHeight(300);
+            modalWindow.setInitialWidth(580);        
+        } else {
+        	infoText.setVisible(Boolean.FALSE);
+            modalWindow.setInitialHeight(200);
+            modalWindow.setInitialWidth(350);
+        }
 
         AjaxButton yesButton = new AjaxButton("yesButton", confirmSubmitForm) {
 

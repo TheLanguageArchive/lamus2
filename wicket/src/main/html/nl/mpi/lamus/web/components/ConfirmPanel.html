@@ -25,6 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <wicket:panel>
             <form wicket:id="confirmSubmitForm">
                 <table summary="About" align="left"  border="0" cellspacing="2" cellpadding="2">
+                   <tr>
+                        <td align="left" valign="top" >
+                            <span wicket:id="confirmation_info_text"></span>
+                        </td>
+                    </tr>
                     <tr>
                         <td align="left" valign="top" >
                             <span wicket:id="confirmation_text"></span>
@@ -32,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                     </tr>
                     <tr>
                         <td>
-                            <label><input type="checkbox" wicket:id="checkbox" /><wicket:message key="workspace_keep_unlinked_files"></wicket:message></label>
+                            <label><input type="checkbox" wicket:id="checkbox"/><small><wicket:message key="workspace_keep_unlinked_files"></wicket:message></small></label>
                         </td>
                     </tr>
                     <tr>
