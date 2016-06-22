@@ -33,6 +33,8 @@ import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.MetadataException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +44,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
+	
+    private static final Logger logger = LoggerFactory.getLogger(LamusArchiveHandleHelper.class);
 
     private final CorpusStructureProvider corpusStructureProvider;
     private final NodeResolver nodeResolver;
@@ -93,7 +97,14 @@ public class LamusArchiveHandleHelper implements ArchiveHandleHelper {
         if(nodeUtil.isNodeMetadata(node)) {
             metadataApiBridge.removeSelfHandleAndSaveDocument(currentLocation);
         }
-        handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
-
+        try {
+        	handleManager.deleteHandle(URI.create(node.getArchiveURI().getSchemeSpecificPart()));
+        } catch (HandleException he) {
+        	if(he.getCode() == HandleException.HANDLE_DOES_NOT_EXIST) {
+                logger.warn("Tried to delete nonexistent handle: " + node.getArchiveURI());
+        	} else {
+        		throw he;
+        	}
+        }
     }
 }
