@@ -69,9 +69,12 @@ import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.type.MetadataDocumentType;
 
 import org.apache.commons.fileupload.FileItem;
+import org.hamcrest.Description;
 import org.hamcrest.Factory;
 import org.hamcrest.Matcher;
 import org.jmock.Expectations;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -430,7 +433,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(new CreateDirectoryOnInvokeAction(createdDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
 
             // second loop iteration
@@ -439,6 +442,32 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockArchiveFileHelper).correctPathElement(with(equal(secondEntryFilename)), with(any(String.class))); will(returnValue(secondEntryFilename));
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(secondEntryName);
             allowing(mockSecondZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+            oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
+            oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
+        }});
+        
+        ZipUploadResult result = uploader.uploadZipFileIntoWorkspace(workspaceID, mockZipInputStream);
+        
+        assertEquals("Result different from expected", expectedResult, result);
+    }
+    
+    @Test
+    public void uploadZipFile_DirectoryAndFile_Windows() throws IOException, DisallowedPathException {
+        
+        final String entryName = "directory/file.cmdi";
+        final File createdFile = new File(workspaceUploadDirectory, entryName);
+        
+        final ZipUploadResult expectedResult = new ZipUploadResult();
+        expectedResult.addSuccessfulUpload(createdFile);
+        
+        context.checking(new Expectations() {{
+        	oneOf(mockWorkspaceDirectoryHandler).getUploadDirectoryForWorkspace(workspaceID); will(returnValue(workspaceUploadDirectory));
+        	oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockFirstZipEntry));
+        	oneOf(mockFirstZipEntry).getName(); will(returnValue(entryName));
+            oneOf(mockArchiveFileHelper).correctPathElement(with(equal(createdFile.getName())), with(any(String.class))); will(returnValue(createdFile.getName()));
+            oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(entryName);
+            oneOf(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.FALSE));
+
             oneOf(mockWorkspaceFileHandler).copyInputStreamToTargetFile(mockZipInputStream, createdFile);
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(null));
         }});
@@ -474,7 +503,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(existingDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
 
             // second loop iteration
@@ -521,7 +549,6 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(existingDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
 
             // second loop iteration
@@ -620,7 +647,7 @@ public class LamusWorkspaceUploaderTest {
             oneOf(mockWorkspaceDirectoryHandler).ensurePathIsAllowed(firstEntryName);
             allowing(mockFirstZipEntry).isDirectory(); will(returnValue(Boolean.TRUE));
             
-            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(returnValue(createdDirectory));
+            oneOf(mockWorkspaceDirectoryHandler).createDirectoryInWorkspace(workspaceID, firstEntryName); will(new CreateDirectoryOnInvokeAction(createdDirectory));
             oneOf(mockZipInputStream).getNextEntry(); will(returnValue(mockSecondZipEntry));
 
             // second loop iteration
@@ -841,8 +868,6 @@ public class LamusWorkspaceUploaderTest {
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
         
-        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
-        
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
         
@@ -932,8 +957,6 @@ public class LamusWorkspaceUploaderTest {
         
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
-        
-        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
         
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
@@ -1025,8 +1048,6 @@ public class LamusWorkspaceUploaderTest {
         
         final Collection<File> uploadedFiles = new ArrayList<>();
         uploadedFiles.add(mockFile1);
-        
-        final Collection<MetadataValidationIssue> issues = new ArrayList<>();
         
         final Collection<WorkspaceNode> uploadedNodes = new ArrayList<>();
         uploadedNodes.add(uploadedNode);
@@ -1979,5 +2000,23 @@ public class LamusWorkspaceUploaderTest {
         assertTrue("Upload problem different from expected", problem instanceof FileImportProblem);
         assertEquals("File added to the upload problem is different from expected", mockFile1, ((FileImportProblem) problem).getProblematicFile());
         assertEquals("Reason for failure of file upload is different from expected", partExpectedErrorMessage, ((FileImportProblem) problem).getErrorMessage());
+    }
+    
+    public class CreateDirectoryOnInvokeAction implements Action {
+        private File result;
+
+        public CreateDirectoryOnInvokeAction(File result) {
+            this.result = result;
+        }
+
+        public Object invoke(Invocation invocation) throws Throwable {
+        	result.mkdirs();
+            return result;
+        }
+
+        public void describeTo(Description description) {
+            description.appendText("returns ");
+            description.appendValue(result);
+        }
     }
 }

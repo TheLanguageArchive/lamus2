@@ -174,12 +174,22 @@ public class LamusWorkspaceUploader implements WorkspaceUploader {
             }
             
             File entryFile = new File(workspaceUploadDirectory, entryName);
+            
             if(nextEntry.isDirectory()) {
-             
-                File createdDirectory = workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, entryName);
+            	File createdDirectory = entryFile;
+            	if(!entryFile.exists()) {
+	                createdDirectory = workspaceDirectoryHandler.createDirectoryInWorkspace(workspaceID, entryName);
+            	}
                 createdDirectories.add(createdDirectory);
                 nextEntry = zipInputStream.getNextEntry();
                 continue;
+            }
+            
+        	//bugfix for windows created zips (intermediate directories are not listed as zip entries)
+            if(entryName.contains(File.separator) && !entryFile.getParentFile().exists()) {
+            	File createDirectory = entryFile.getParentFile();
+            	createDirectory.mkdirs();
+            	createdDirectories.add(createDirectory);
             }
             
             File entryBaseDirectory = entryFile.getParentFile();
