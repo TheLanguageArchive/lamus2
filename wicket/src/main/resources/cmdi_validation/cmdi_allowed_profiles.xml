@@ -159,7 +159,24 @@
             <allowedReferenceType>SearchService</allowedReferenceType>
         </allowedReferenceTypes>
         <allowInfoLinks>false</allowInfoLinks>
+        <componentsByMimetype>
+            <component>
+                <key>^(?!.*text/x-cmdi\+xml)(text|application)/.*$</key>
+                <value>SL-IPROSLA/SL-Resources/SL-AnnotationDocument</value>
+            </component>
+            <component>
+                <key>^info$</key>
+                <value>lat-session/InfoLink</value>
+            </component>
+        </componentsByMimetype>
+        <componentsByNodeType>
+            <component>
+                <key>^RESOURCE_WRITTEN$</key>
+                <value>SL-IPROSLA/SL-Resources/SL-AnnotationDocument</value>
+            </component>
+        </componentsByNodeType>
         <translateType>session</translateType>
+        <documentNamePath>/cmd:CMD/cmd:Components/cmd:SL-IPROSLA/cmd:SL-Session/cmd:ResourceShortName</documentNamePath>
     </profile>
     <profile id="clarin.eu:cr1:p_1396012485083" name="VALID">
         <location>http://catalog.clarin.eu/ds/ComponentRegistry/rest/registry/profiles/clarin.eu:cr1:p_1396012485083</location>
