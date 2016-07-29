@@ -301,7 +301,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         }
         
         String message = "CMDI Profile [" + (matchedProfile != null ? matchedProfile.getId() : "null") + "] has no component types configured. Reference will not be added to parent.";
-        logger.info(message);
+        logger.warn(message);
         return null;
     }
 
@@ -499,7 +499,7 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             	CMDIMetadataElement childMetadataElement = metadataElementFactory.createNewMetadataElement(parent, (CMDIProfileElement) child);
             	String value = null;
             	if (((CMDIProfileElement) child).getSchemaElement().getType().getContentType() == SchemaType.ELEMENT_CONTENT) {
-            		createMandatoryChildrenOnElement(type, childMetadataElement, node);
+            		createMandatoryChildrenOnElement((ComponentType) child, childMetadataElement, node);
             	} else {
             		switch (child.getName()) {
             		case "Format":
