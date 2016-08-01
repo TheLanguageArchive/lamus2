@@ -498,7 +498,8 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
         	if (((CMDIProfileElement) child).getMinOccurences() > 0) {
             	CMDIMetadataElement childMetadataElement = metadataElementFactory.createNewMetadataElement(parent, (CMDIProfileElement) child);
             	String value = null;
-            	if (((CMDIProfileElement) child).getSchemaElement().getType().getContentType() == SchemaType.ELEMENT_CONTENT) {
+            	int childSchemaType = ((CMDIProfileElement) child).getSchemaElement().getType().getContentType();
+            	if (childSchemaType == SchemaType.ELEMENT_CONTENT || childSchemaType == SchemaType.MIXED_CONTENT) {
             		createMandatoryChildrenOnElement((ComponentType) child, childMetadataElement, node);
             	} else {
             		switch (child.getName()) {
@@ -551,10 +552,10 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             				value = possibleValues.get(possibleValues.size() - 1).getValue();
             			}
             		}
-                	if (value != null)
-                		((MetadataField) childMetadataElement).setValue(value);
-                	parent.addChildElement(childMetadataElement);
             	}
+            	if (value != null)
+            		((MetadataField) childMetadataElement).setValue(value);
+            	parent.addChildElement(childMetadataElement);
         	}
         }
     }
