@@ -1,3 +1,32 @@
+lamus2-1.6.1 (2016-02-26)
+
+    Changes:
+        - Introduced CMDI validation upon submission in the archive.
+        - Added metadata validation feedback to the UI, for "create" and "submit" workspace actions.
+        - Creating mandatory children (from profile schema) when linking/unlinking nodes in the UI.
+        - Added support for directory names which are different from their respective node names.
+        - Added optional multi-line label for information text to the generic confirmation popup.
+        - Added support to provide workspace files via a manual symbolic link.
+        - Block the creation of workspaces in top nodes that are part of multiple vpaths.
+        - Update handle for deleted files (instead of deleting it).
+        - When metadata files are supplied via the orphans folder, link/unlink workspace nodes by editing their copies rather than the original files.
+        - Added UI feedback when a metadata reference is automatically removed because it has no matching proxy.
+        - Trigger AMS2 recalculation on nodes' canonical vpaths when workspace contains children with multiple vpaths.
+
+    Fixes:
+        - Extraction of windows generated .zip files.
+        - Problems finding corresponding workspace nodes for file references in certain conditions.
+        - Handle exception when trying to delete a nonexistent handle.
+        - Cleanup of orphans' directory supplied files.
+        - Fall back when atomic move fails.
+        - Problems with metadata API swapping the order of the elements thus generating invalid CMDI.
+        - NPE thrown when moving existing archive resources between sessions on the same workspace.
+        - NPE when trying to update references in the parent.
+        - Directory naming for workspaces containing partially archived branches.
+        - Vertical scrollbar missing in workspace management page.
+        - 'Page not found' error after logout from the workspaces' management page.
+        - Exception when trying to delete workspaces which failed during initialization.
+          
 lamus2-1.6.0 (2016-02-26)
 
     Changes:
