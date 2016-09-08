@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,8 +33,10 @@ import java.util.Map;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.handle.util.HandleParser;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.dao.WorkspaceDao;
 import nl.mpi.lamus.exception.WorkspaceException;
+import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
@@ -68,6 +72,12 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     private final MetadataAPI metadataAPI;
     private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceFileHandler workspaceFileHandler;
+    
+    @Autowired
+    private WorkspaceDirectoryHandler workspaceDirectoryHandler;
+    
+    @Autowired
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
     
     @Autowired
     public LamusWorkspaceUploadReferenceHandler(
@@ -126,8 +136,43 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 
                 logger.debug("Reference has localURI " + refLocalURI);
                 
-                matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
-                
+                if(refLocalURI.isAbsolute()) {
+                	matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
+                } else {
+                	Path docPath = Paths.get(currentDocument.getFileLocation().getPath());
+                	Path path = Paths.get(docPath.getParent().toString(),  refLocalURI.getPath().toString()).normalize();
+                	if(path.toFile().exists()) {
+                		matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, path.toString());
+                	} else {
+                		//if it is a resource made available via the orphans folder look in the original orphans folder since these are not
+                		//copied to the workspace
+                		Path wsOrphansDirectoryPath = workspaceDirectoryHandler.getOrphansDirectoryInWorkspace(workspace.getWorkspaceID()).toPath().normalize();
+                		if (path.startsWith(wsOrphansDirectoryPath)) {
+                			try {
+                				Path orphansDirectoryPath = archiveFileLocationProvider.getOrphansDirectory(workspace.getTopNodeArchiveURL().toURI()).toPath();
+                				Path pathInOrphansDirectory = Paths.get(orphansDirectoryPath.toString(), wsOrphansDirectoryPath.relativize(path).toString());
+                				if (pathInOrphansDirectory.toFile().exists()) {
+                					matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, pathInOrphansDirectory.toString());
+                				}
+                			} catch (URISyntaxException e) {
+                				logger.warn("Cannot search for reference: [" + refLocalURI.toString() + "] in orphans directory. Top node archive URL: " + workspace.getTopNodeArchiveURL().toString() + 
+                						" cannot be converted to URI. Trying to match by file name only...");
+                				matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
+                			}
+                		} else {
+                			//if it is a resource already archived look for it in the archive since these are not copied to the workspace
+                			Path pathInArchive = Paths.get(workspace.getTopNodeArchiveURL().toString(), wsOrphansDirectoryPath.relativize(path).toString());
+                			if (pathInArchive.toFile().exists()) {
+                				matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, pathInArchive.toString());
+                			} else {
+                				logger.warn("File for reference: [" + refLocalURI.toString() + "] cannot be found in the workspace, nor archive, nor in the original orphans directory via its localURI." +
+                						" Trying to match by file name only...");
+                				matchedNode = workspaceUploadNodeMatcher.findNodeForPath(nodesToCheck, refLocalURI.toString());
+                			}
+                		}
+                	}
+                }
+
                 if(matchedNode != null) {
                     if(refURI != null && !refURI.toString().isEmpty() && handleParser.isHandleUriWithKnownPrefix(refURI)) {
                             matchedNode.setArchiveURI(handleParser.prepareAndValidateHandleWithHdlPrefix(refURI));

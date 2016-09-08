@@ -181,12 +181,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
     @Override
     public WorkspaceNode findNodeForPath(Collection<WorkspaceNode> nodesToCheck, String referencePath) {
         
-        if(!referencePath.isEmpty()) {
-        	
-        	//FIXME: if there are two files with the same name but located in different relative paths, 
-        	//this block of code can return the wrong workspace node, as long as the reference path ending matches
-        	//the ending of another workspace node before matching itself. 
-            
+        if(!referencePath.isEmpty()) {            
             String referencePathEnding = referencePath;
             while(referencePathEnding.startsWith(".")) {
                 referencePathEnding = referencePathEnding.substring(referencePathEnding.indexOf(File.separator) + 1);
@@ -195,7 +190,7 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             for(WorkspaceNode innerNode : nodesToCheck) {
                     
                 Path refPath = Paths.get(referencePathEnding);
-                Path nodePath = Paths.get(innerNode.getWorkspaceURL().toString());
+                Path nodePath = Paths.get(innerNode.getWorkspaceURL().getPath().toString());
 
                 if(nodePath.endsWith(refPath)) { //check if the node URL contains the relative path that comes in the link reference
                     return innerNode;
