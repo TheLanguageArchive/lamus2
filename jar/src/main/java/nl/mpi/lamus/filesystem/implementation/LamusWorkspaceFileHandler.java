@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import javax.xml.transform.stream.StreamResult;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.workspace.management.WorkspaceAccessChecker;
@@ -50,7 +51,7 @@ import org.springframework.stereotype.Component;
 public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(LamusWorkspaceFileHandler.class);
-    
+        
     @Autowired
     @Qualifier("workspaceBaseDirectory")
     private File workspaceBaseDirectory;
@@ -60,11 +61,13 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
     
     private final ArchiveFileLocationProvider archiveFileLocationProvider;
     private final WorkspaceAccessChecker workspaceAccessChecker;
+    private final ArchiveFileHelper archiveFileHelper;
     
     @Autowired
-    public LamusWorkspaceFileHandler(ArchiveFileLocationProvider aflProvider, WorkspaceAccessChecker wsAccessChecker) {
+    public LamusWorkspaceFileHandler(ArchiveFileLocationProvider aflProvider, WorkspaceAccessChecker wsAccessChecker, ArchiveFileHelper fileHelper) {
         archiveFileLocationProvider = aflProvider;
         workspaceAccessChecker = wsAccessChecker;
+        archiveFileHelper = fileHelper;
     }
     
 
@@ -122,7 +125,7 @@ public class LamusWorkspaceFileHandler implements WorkspaceFileHandler {
         File workspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceNode.getWorkspaceID());
         String nodeFilename = FilenameUtils.getName(archiveFile.getPath());
         
-        File workspaceNodeFile = new File(workspaceDirectory, nodeFilename);
+        File workspaceNodeFile = archiveFileHelper.getFinalFile(workspaceDirectory, nodeFilename);
         
         return workspaceNodeFile;
     }

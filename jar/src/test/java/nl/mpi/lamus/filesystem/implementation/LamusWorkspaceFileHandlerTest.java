@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import javax.xml.transform.stream.StreamResult;
+import nl.mpi.lamus.archive.ArchiveFileHelper;
 import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.exception.NodeAccessException;
 import nl.mpi.lamus.filesystem.LamusFilesystemTestProperties;
@@ -93,6 +94,11 @@ public class LamusWorkspaceFileHandlerTest {
         public WorkspaceAccessChecker workspaceAccessChecker() {
             return mockWorkspaceAccessChecker;
         }
+        
+        @Bean
+        public ArchiveFileHelper archiveFileHelper() {
+            return mockArchiveFileHelper;
+        }
     }
     
     @Rule public JUnitRuleMockery context = new JUnitRuleMockery() {{
@@ -102,6 +108,7 @@ public class LamusWorkspaceFileHandlerTest {
     
     @Mock static ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     @Mock static WorkspaceAccessChecker mockWorkspaceAccessChecker;
+    @Mock static ArchiveFileHelper mockArchiveFileHelper;
     
     @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
@@ -141,6 +148,7 @@ public class LamusWorkspaceFileHandlerTest {
         
         ReflectionTestUtils.setField(workspaceFileHandler, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
         ReflectionTestUtils.setField(workspaceFileHandler, "workspaceAccessChecker", mockWorkspaceAccessChecker);
+        ReflectionTestUtils.setField(workspaceFileHandler, "archiveFileHelper", mockArchiveFileHelper);
     }
     
     @After
@@ -354,13 +362,13 @@ public class LamusWorkspaceFileHandlerTest {
         final String nodeFilename = "someNode.cmdi";
         final String archiveNodePath = "file:/somewhere/in/the/archive/" + nodeFilename;
         
-        File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
-        File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
+        final File expectedWorkspaceDirectory = new File(workspaceBaseDirectory, "" + workspaceID);
+        final File expectedNodeFile = new File(expectedWorkspaceDirectory, nodeFilename);
         
         context.checking(new Expectations() {{
-            
             oneOf(mockWorkspaceNode).getWorkspaceID(); will(returnValue(workspaceID));
             oneOf(mockArchiveFile).getPath(); will(returnValue(archiveNodePath));
+            oneOf(mockArchiveFileHelper).getFinalFile(expectedWorkspaceDirectory, nodeFilename); will(returnValue(expectedNodeFile));
         }});
         
         File retrievedFile = workspaceFileHandler.getFileForImportedWorkspaceNode(mockArchiveFile, mockWorkspaceNode);
