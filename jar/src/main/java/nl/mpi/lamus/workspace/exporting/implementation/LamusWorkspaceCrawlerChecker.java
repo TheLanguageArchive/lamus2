@@ -137,10 +137,14 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
         
         Collection<WorkspaceNode> descendantNodes = workspaceDao.getMetadataNodesInTreeForWorkspace(workspace.getWorkspaceID());
         
+        URI topNodeArchiveURI = workspace.getTopNodeArchiveURI();
+        
         Set<URI> canoninalParents = new HashSet<URI>();
         for (WorkspaceNode node : descendantNodes) {
         	URI canonicalParent = corpusStructureProvider.getCanonicalParent(node.getArchiveURI());
-        	if (node.isProtected() && canonicalParent != null) {
+        	Collection<URI> topNodeDescendants = corpusStructureProvider.getDescendants(topNodeArchiveURI);
+        	
+        	if (node.isProtected() && canonicalParent != null && !topNodeDescendants.contains(canonicalParent)) {
                 logger.debug("Worspace child protected: [" + node.getName() + "] adding canonical parent for rights recalcualtion: [" + canonicalParent.toString() + "]");
         		canoninalParents.add(canonicalParent);
         	}
@@ -151,7 +155,6 @@ public class LamusWorkspaceCrawlerChecker implements WorkspaceCrawlerChecker {
             
             logger.debug("Triggering access rigths recalculation for workspace " + workspace.getWorkspaceID());
             
-            URI topNodeArchiveURI = workspace.getTopNodeArchiveURI();
             canoninalParents.add(topNodeArchiveURI);
             logger.debug("Added workspace top node for rights recalculation: " + topNodeArchiveURI);
             

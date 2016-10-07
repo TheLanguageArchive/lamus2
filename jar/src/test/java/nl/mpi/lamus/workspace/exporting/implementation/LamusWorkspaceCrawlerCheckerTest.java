@@ -275,6 +275,8 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockFailedSubmittedWorkspace);
             oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1); 
             
+            oneOf(mockFailedSubmittedWorkspace).getTopNodeArchiveURI();
+            
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockFailedSubmittedWorkspace, Boolean.FALSE, Boolean.TRUE);
         }});
         
@@ -397,11 +399,15 @@ public class LamusWorkspaceCrawlerCheckerTest {
             
             oneOf(mockWorkspaceNode1).isProtected(); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceNode1).getArchiveURI(); will(returnValue(wsChildNodeURI1));
+            oneOf(mockCSProvider).getDescendants(topNodeURI_1);
+
             oneOf(mockCSProvider).getCanonicalParent(wsChildNodeURI1); will(returnValue(canonicalParentURI1));
             oneOf(mockWorkspaceNode1).getName();
             
             oneOf(mockWorkspaceNode2).isProtected(); will(returnValue(Boolean.TRUE));
             oneOf(mockWorkspaceNode2).getArchiveURI(); will(returnValue(wsChildNodeURI2));
+            oneOf(mockCSProvider).getDescendants(topNodeURI_1);
+
             oneOf(mockCSProvider).getCanonicalParent(wsChildNodeURI2); will(returnValue(canonicalParentURI2));
             oneOf(mockWorkspaceNode2).getName();
             
@@ -455,6 +461,9 @@ public class LamusWorkspaceCrawlerCheckerTest {
             oneOf(mockSuccessfulSubmittedWorkspace1).setMessage(failedMessage);
             oneOf(mockWorkspaceDao).updateWorkspaceStatusMessage(mockSuccessfulSubmittedWorkspace1);
             oneOf(mockWorkspaceDao).getMetadataNodesInTreeForWorkspace(workspaceID_1); 
+            
+            oneOf(mockSuccessfulSubmittedWorkspace1).getTopNodeArchiveURI();
+
             
             oneOf(mockWorkspaceMailer).sendWorkspaceFinalMessage(mockSuccessfulSubmittedWorkspace1, Boolean.TRUE, Boolean.FALSE);
         }});
