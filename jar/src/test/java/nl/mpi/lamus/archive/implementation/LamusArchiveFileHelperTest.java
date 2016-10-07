@@ -314,7 +314,7 @@ public class LamusArchiveFileHelperTest {
     public void getFinalFileExistingOneName() throws IOException {
         
         final String fileName = "file.cmdi";
-        final String expectedName = "file_2.cmdi";
+        final String expectedName = "file_1.cmdi";
         prepareExistingTempDirectory();
         
         File file = new File(existingTempDirectory, fileName);
