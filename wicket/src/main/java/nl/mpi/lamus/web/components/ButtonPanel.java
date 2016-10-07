@@ -229,7 +229,7 @@ public final class ButtonPanel extends FeedbackPanelAwarePanel<Workspace> {
             throw new UnsupportedOperationException("Submission type not supported");
         }
         
-        final ConfirmationOptions options = new ConfirmationOptions(false, true, submissionType, confirmationInfoText, confirmationText);
+        final ConfirmationOptions options = new ConfirmationOptions(false, false, submissionType, confirmationInfoText, confirmationText);
         
         ModalWindow modalConfirm = new ModalWindow(id);
         modalConfirm.setContent(new ConfirmPanel(modalConfirm.getContentId(), modalConfirm, options));
