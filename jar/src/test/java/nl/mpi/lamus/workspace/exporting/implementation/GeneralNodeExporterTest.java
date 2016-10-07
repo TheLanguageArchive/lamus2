@@ -64,6 +64,7 @@ import static org.junit.Assert.*;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -102,6 +103,8 @@ public class GeneralNodeExporterTest {
     
     @Mock WorkspaceNode mockParentWsNode;
     @Mock WorkspaceNode mockChildWsNode;
+    
+    @Rule public TemporaryFolder testFolder = new TemporaryFolder();
     
     private NodeExporter generalNodeExporter;
     private Workspace workspace;
@@ -744,6 +747,7 @@ public class GeneralNodeExporterTest {
             final Exception expectedException) throws IOException, MetadataException, TransformerException, URISyntaxException {
         
         final URI childUriRelativeToParent = URI.create(childPathRelativeToParent);
+        final File mockParentFile = testFolder.newFile("mockParentFile");
         
         context.checking(new Expectations() {{
             
@@ -756,7 +760,7 @@ public class GeneralNodeExporterTest {
             oneOf(mockMetadataAPI).getMetadataDocument(parentWsURL);
                 will(returnValue(mockParentCmdiDocument));
             
-            oneOf(mockArchiveFileLocationProvider).getChildPathRelativeToParent(parentArchiveLocalFile, childArchiveLocalFile);
+            oneOf(mockArchiveFileLocationProvider).getChildPathRelativeToParent(mockParentFile, childArchiveLocalFile);
                 will(returnValue(childPathRelativeToParent));
             
             oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(childArchiveURI));
@@ -768,9 +772,12 @@ public class GeneralNodeExporterTest {
             oneOf(mockParentWsNode).getWorkspaceURL(); will(returnValue(parentWsURL));
             oneOf(mockWorkspaceFileHandler).getStreamResultForNodeFile(parentWsFile);
                 will(returnValue(mockStreamResult));
+
+            oneOf(mockParentWsNode).getArchiveURL(); will(returnValue(mockParentFile.toURI().toURL()));
+
         }});
         
-        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(parentArchiveLocalFile);
+        stub(method(FileUtils.class, "toFile", URL.class)).toReturn(mockParentFile);
         
         if(expectedException != null) {
             context.checking(new Expectations() {{

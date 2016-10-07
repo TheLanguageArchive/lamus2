@@ -177,13 +177,12 @@ public class GeneralNodeExporter implements NodeExporter {
             }
         }
         
-        CorpusNode parentCorpusNode = this.corpusStructureProvider.getNode(parentNode.getArchiveURI());
-        if(parentCorpusNode == null) {
-            String errorMessage = "Parent node not found in archive database for URI " + parentNode.getArchiveURI();
+        File parentNodeArchiveFile = FileUtils.toFile(parentNode.getArchiveURL());
+        
+        if (!parentNodeArchiveFile.exists()) {
+            String errorMessage = "Parent node not found in archive for URL " + parentNode.getArchiveURL();
             throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
-        
-        File parentNodeArchiveFile = FileUtils.toFile(parentNode.getArchiveURL());
         
         CMDIDocument cmdiDocument = retrieveCmdiDocument(workspaceID, parentNode);
         String currentPathRelativeToParent = 
