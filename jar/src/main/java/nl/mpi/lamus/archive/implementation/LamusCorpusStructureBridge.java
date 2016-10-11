@@ -77,6 +77,9 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         boolean foundTopNode = false;
         
         URI currentNodeURI = node.getArchiveURI();
+        
+        logger.trace("Node archive uri: " + currentNodeURI.toString());
+        
         CorpusNode currentCorpusNode = corpusStructureProvider.getNode(currentNodeURI);
         if(currentCorpusNode == null) {
             String errorMessage = "Node not found in archive database for URI " + currentNodeURI;
@@ -85,6 +88,9 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
         }
         File currentLocalFile = nodeResolver.getLocalFile(currentCorpusNode);
         String currentLocalPath = currentLocalFile.getAbsolutePath();
+        
+        logger.trace("Node local path: " + currentLocalPath);
+
         boolean currentPathContainsCorpusstructureDir = currentLocalPath.contains(File.separator + corpusstructureDirectoryName + File.separator);
         boolean currentPathContainsMetadataDir = currentLocalPath.contains(File.separator + metadataDirectoryName + File.separator);
         
@@ -109,9 +115,14 @@ public class LamusCorpusStructureBridge implements CorpusStructureBridge{
             boolean parentPathContainsCorpusstructureDir = parentLocalPath.contains(File.separator + corpusstructureDirectoryName + File.separator);
             boolean parentPathContainsMetadataDir = parentLocalPath.contains(File.separator + metadataDirectoryName + File.separator);
             
+            logger.trace("Parent local path: " + parentLocalPath);
+            
             if(currentPathContainsCorpusstructureDir) {
                 String currentDirectory = FilenameUtils.getFullPath(currentLocalPath);
                 String parentDirectory = FilenameUtils.getFullPath(parentLocalPath);
+                
+                logger.trace("Parent directory: " + parentDirectory + " Current directory: " + currentDirectory);
+
                 if(!currentDirectory.equals(parentDirectory)) {
                     foundTopNode = true;
                     

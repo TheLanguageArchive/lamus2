@@ -269,12 +269,16 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
     public String getComponentPathForProfileAndReferenceType(URI profileLocation,
             String referenceMimetype, WorkspaceNodeType referenceNodeType, boolean isInfoLink) {
         
+    	logger.trace("Profile location URI: " + profileLocation.toString() + "; Reference mime type: " + referenceMimetype + "; Reference node type: "+ referenceNodeType + "; isInfoLink: " + isInfoLink);
+
         if(referenceMimetype == null && referenceNodeType == null) {
             return null;
         }
         
         CmdiProfile matchedProfile = getProfileWithLocation(profileLocation);
         
+        logger.trace("Matched profile: " + matchedProfile.toString());
+
         if(matchedProfile != null) {
             boolean usingMimetype = true;
             Map<String, String> componentMap;
@@ -289,10 +293,16 @@ public class LamusMetadataApiBridge implements MetadataApiBridge {
             if(componentMap != null && !componentMap.isEmpty()) {
                 Set<Map.Entry<String, String>> entrySet = componentMap.entrySet();
                 for(Map.Entry<String, String> entry : entrySet) {
+                	
+                    logger.trace("Component entry: " + entry);
+
                     String typeToCheck = usingMimetype ? referenceMimetype : referenceNodeType.name();
                     if(isInfoLink && usingMimetype) {
                         typeToCheck = "info";
                     }
+                    
+                    logger.trace("Entry key: " + entry.getKey() + "; Type to check: " + typeToCheck);
+
                     if(Pattern.matches(entry.getKey(), typeToCheck)) {
                         return entry.getValue();
                     }
