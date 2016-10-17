@@ -20,6 +20,7 @@ import nl.mpi.lamus.web.pages.CreateWorkspacePage;
 import nl.mpi.lamus.web.pages.IndexPage;
 import nl.mpi.lamus.web.pages.LamusPage;
 import nl.mpi.lamus.web.pages.SelectWorkspacePage;
+import nl.mpi.lamus.web.pages.WorkspacePage;
 import nl.mpi.lamus.web.pages.management.ManageWorkspacesPage;
 import nl.mpi.lamus.web.session.LamusSession;
 import nl.mpi.lamus.web.session.LamusSessionFactory;
@@ -79,6 +80,7 @@ public class LamusWicketApplication extends WebApplication implements Applicatio
         mountPage("/CreateWorkspacePage", CreateWorkspacePage.class);
         mountPage("/SelectWorkspacePage", SelectWorkspacePage.class);
         mountPage("/ManageWorkspacesPage", ManageWorkspacesPage.class);
+        mountPage("/WorkspacePage", WorkspacePage.class);
 
         PackageResourceReference tlaLogoImageReference = new PackageResourceReference(LamusPage.class, "tla_logo.png");
         getSharedResources().add("tlaLogoImage", tlaLogoImageReference.getResource());
