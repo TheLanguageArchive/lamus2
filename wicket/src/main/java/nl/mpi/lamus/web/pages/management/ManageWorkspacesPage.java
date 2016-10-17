@@ -138,8 +138,8 @@ public class ManageWorkspacesPage extends LamusPage {
 
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_workspace_id", this)), "workspaceID", "workspaceID"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_user_id", this)), "userID", "userID"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeArchiveURI"));
-        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_url", this)), "topNodeArchiveURL"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_uri", this)), "topNodeURI", "topNodeArchiveURI"));
+        columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_top_node_url", this)), "topNodeURL", "topNodeArchiveURL"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_start_date", this)), "startDate", "startDateStr"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_end_date", this)), "endDateStr"));
         columns.add(new PropertyColumn<Workspace, String>(new Model<>(getLocalizer().getString("management_table_column_session_start_date", this)), "sessionStartDateStr"));
