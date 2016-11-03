@@ -16,6 +16,7 @@
  */
 package nl.mpi.lamus.workspace.exporting.implementation;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -25,6 +26,8 @@ import java.util.UUID;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
+import nl.mpi.handle.util.HandleManager;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -79,6 +82,8 @@ public class UnlinkedNodeExporterTest {
     @Mock CorpusNode mockCorpusNode;
     @Mock ReferencingMetadataDocument mockParentDocument;
     @Mock Reference mockReference;
+    @Mock HandleManager mockHandleManager;
+    @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
     
     private final int wsID = 1;
     private final int nodeWsID = 10;
@@ -105,6 +110,8 @@ public class UnlinkedNodeExporterTest {
         ReflectionTestUtils.setField(unlinkedNodeExporter, "metadataAPI", mockMetadataAPI);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "workspaceDao", mockWorkspaceDao);
         ReflectionTestUtils.setField(unlinkedNodeExporter, "nodeUtil", mockNodeUtil);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "handleManager", mockHandleManager);
+        ReflectionTestUtils.setField(unlinkedNodeExporter, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
     }
     
     @After
@@ -203,7 +210,7 @@ public class UnlinkedNodeExporterTest {
     
     @Test
     public void exportArchiveResource_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
-            throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/initial/location/node.txt");
@@ -225,13 +232,17 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            exactly(2).of(mockNode).getWorkspaceURL(); will(returnValue(nodeArchiveURL));
             oneOf(mockNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(new File(nodeArchiveURL.getPath()));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
-            
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockNode, nodeArchiveURL);
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(nodeArchiveURL.toURI());
+            oneOf(mockNode).getArchiveURL(); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(new File(nodeVersionArchivePath.substring(nodeVersionArchivePath.indexOf("/"))), nodeArchiveURI, null);
             
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
@@ -245,7 +256,7 @@ public class UnlinkedNodeExporterTest {
     @Test
     public void exportArchiveResourceWithParent_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
             throws MalformedURLException, WorkspaceExportException,
-            IOException, MetadataException, TransformerException, HandleException {
+            IOException, MetadataException, TransformerException, HandleException, URISyntaxException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/initial/location/node.txt");
@@ -271,14 +282,21 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
-            oneOf(mockNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
+            exactly(2).of(mockNode).getWorkspaceURL(); will(returnValue(nodeArchiveURL));
+
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(new File(nodeArchiveURL.getPath()));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockNode, nodeArchiveURL);
+            oneOf(mockNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
             
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(nodeArchiveURL.toURI());
+            oneOf(mockNode).getArchiveURL(); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(new File(nodeVersionArchivePath.substring(nodeVersionArchivePath.indexOf("/"))), nodeArchiveURI, null);
+                        
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
         }});
@@ -292,7 +310,7 @@ public class UnlinkedNodeExporterTest {
     
     @Test
     public void exportArchiveMetadata_DoNotKeepUnlinkedFiles_SubmitSubmissionType()
-            throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException {
+            throws MalformedURLException, WorkspaceExportException, HandleException, IOException, TransformerException, MetadataException, URISyntaxException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         final URL nodeArchiveURL = new URL("file:/initial/location/node.txt");
@@ -315,6 +333,9 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            exactly(2).of(mockNode).getWorkspaceURL(); will(returnValue(nodeArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(new File(nodeArchiveURL.getPath()));
+
             oneOf(mockNode).getArchiveURL(); will(returnValue(nodeArchiveURL));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
@@ -322,7 +343,10 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(nodeVersionArchiveURL));
             
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockNode, nodeArchiveURL);
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(nodeArchiveURL.toURI());
+            oneOf(mockNode).getArchiveURL(); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(new File(nodeVersionArchivePath.substring(nodeVersionArchivePath.indexOf("/"))), nodeArchiveURI, null);
             
             oneOf(mockNode).setArchiveURL(nodeVersionArchiveURL);
             oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
@@ -356,7 +380,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
         }});
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
@@ -394,12 +418,12 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
             
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationUri, nodeFilenameUri, null);
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
@@ -438,12 +462,13 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
             
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationUri, nodeFilenameUri, null);
+
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
         
@@ -453,7 +478,7 @@ public class UnlinkedNodeExporterTest {
     @Test
     public void exportArchiveResource_KeepUnlinkedFiles_SubmitSubmissionType()
             throws MalformedURLException, HandleException, IOException,
-            TransformerException, MetadataException, WorkspaceExportException {
+            TransformerException, MetadataException, WorkspaceExportException, URISyntaxException {
         
         final URI nodeArchiveURI = URI.create(UUID.randomUUID().toString());
         
@@ -475,19 +500,32 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
         
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockNode).getArchiveURL(); will(returnValue(newNodeLocation));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
-            
-            oneOf(mockArchiveHandleHelper).deleteArchiveHandleFromServerAndFile(mockNode, newNodeLocation);
-        }});
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(new File(newNodeLocation.getPath()));
 
-        updateNodeWorkspaceUrlInDb(newNodeLocation);
-        
-        updateNodeArchiveUrlInDb(mockUrl);
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, true); will(returnValue(newNodeLocation));
+
+            oneOf(mockVersioningHandler).moveFileToTrashCanFolder(mockNode); will(returnValue(newNodeLocation));
+
+            oneOf(mockArchiveFileLocationProvider).getUriWithHttpsRoot(newNodeLocation.toURI());
+            oneOf(mockNode).getArchiveURL(); will(returnValue(newNodeLocation));
+            oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockHandleManager).updateHandle(new File(newNodeLocation.toURI()), nodeArchiveURI, null);
+            
+            oneOf(mockNode).setArchiveURL(newNodeLocation);
+
+            oneOf(mockWorkspaceDao).updateNodeArchiveUrl(mockNode);
+
+        }});
         
         setNodeAsDeletedInDb();
+        
+        updateNodeWorkspaceUrlInDb(newNodeLocation);
+        
+        updateNodeArchiveUrlInDb(newNodeLocation);
         
         unlinkedNodeExporter.exportNode(mockWorkspace, null, parentCorpusNamePathToClosestTopNode, mockNode, keepUnlinkedFiles, submissionType, exportPhase);
     }
@@ -514,7 +552,7 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
         }});
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
@@ -554,11 +592,11 @@ public class UnlinkedNodeExporterTest {
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
             oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
-        updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, null);
+        updateReferenceInParent(parentWsUrl, newNodeLocationUri, newNodeLocationUri, nodeFilenameUri, null);
         
         updateNodeWorkspaceUrlInDb(newNodeLocation);
 
@@ -610,6 +648,7 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
             
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            oneOf(mockNode).getWorkspaceURL();
         }});
         
         updateReferenceInParent(parentWsUrl, nodeArchiveURI, nodeArchiveURI, null, null);
@@ -643,6 +682,8 @@ public class UnlinkedNodeExporterTest {
         context.checking(new Expectations() {{
 
             oneOf(mockNode).getArchiveURI(); will(returnValue(nodeArchiveURI));
+            exactly(2).of(mockNode).getWorkspaceURL(); will(returnValue(nodeVersionArchiveURL));
+            oneOf(mockArchiveFileLocationProvider).isFileInOrphansDirectory(new File(nodeVersionArchiveURL.getPath()));
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             oneOf(mockWorkspaceTreeExporter).explore(mockWorkspace, mockNode, currentCorpusNamePathToClosestTopNode, keepUnlinkedFiles, submissionType, exportPhase);
@@ -690,9 +731,9 @@ public class UnlinkedNodeExporterTest {
             
             oneOf(mockNodeUtil).isNodeMetadata(mockNode); will(returnValue(isNodeMetadata));
             
-            oneOf(mockVersioningHandler).moveFileToOrphansFolder(mockWorkspace, mockNode); will(returnValue(newNodeLocation));
+            oneOf(mockVersioningHandler).moveOrCopyFileToOrphansFolder(mockWorkspace, mockNode, false); will(returnValue(newNodeLocation));
             
-            oneOf(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
+            exactly(4).of(mockNode).getWorkspaceURL(); will(returnValue(nodeWsLocation));
         }});
         
         updateReferenceInParent(parentWsUrl, nodeWsLocationUri, newNodeLocationUri, nodeFilenameUri, expectedCause);

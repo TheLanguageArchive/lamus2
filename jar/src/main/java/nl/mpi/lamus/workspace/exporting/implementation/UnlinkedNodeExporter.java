@@ -18,11 +18,13 @@ package nl.mpi.lamus.workspace.exporting.implementation;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import javax.xml.transform.TransformerException;
 import net.handle.hdllib.HandleException;
+import nl.mpi.handle.util.HandleManager;
+import nl.mpi.lamus.archive.ArchiveFileLocationProvider;
 import nl.mpi.lamus.archive.ArchiveHandleHelper;
 import nl.mpi.lamus.archive.CorpusStructureBridge;
 import nl.mpi.lamus.dao.WorkspaceDao;
@@ -71,6 +73,10 @@ public class UnlinkedNodeExporter implements NodeExporter{
     private WorkspaceDao workspaceDao;
     @Autowired
     private NodeUtil nodeUtil;
+    @Autowired
+    private HandleManager handleManager;
+    @Autowired
+    private ArchiveFileLocationProvider archiveFileLocationProvider;
     
 
     /**
@@ -116,7 +122,9 @@ public class UnlinkedNodeExporter implements NodeExporter{
         
         if(!keepUnlinkedFiles && WorkspaceSubmissionType.SUBMIT_WORKSPACE.equals(submissionType)) {
             
-            if(currentArchiveUri != null) {
+        	File nodeFile = currentNode.getWorkspaceURL() != null ? new File(currentNode.getWorkspaceURL().getPath()) : new File(currentNode.getArchiveURL().getPath());
+
+            if(currentArchiveUri != null && !archiveFileLocationProvider.isFileInOrphansDirectory(nodeFile)) {
                 
                 if(nodeUtil.isNodeMetadata(currentNode)) {
                     workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
@@ -125,13 +133,13 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 URI trashedNodeArchiveUri = URI.create(trashedNodeArchiveURL.toString());
                 
                 if(parentNode != null) {
-                    ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
+                    ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode, parentNode.getWorkspaceURL());
                     updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, trashedNodeArchiveUri, parentNode.getWorkspaceURL(), parentDocument, trashedNodeArchiveURL.getFile());
                 }
                 
                 logger.debug("Node " + currentArchiveUri + " not to be kept, but moved to the trashcan.");
                 
-                updateHandleLocation(currentNode);
+                updateHandleLocation(workspace.getWorkspaceID(), currentNode);
                 
                 workspaceDao.setWorkspaceNodeAsDeleted(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID(), currentNode.isExternal());
                 
@@ -149,8 +157,9 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 logger.debug("Node " + currentArchiveUri + " is in the archive and the workspace is being deleted, therefore this unlinked file won't be kept outside of the archive.");
 
                 if(parentNode != null) {
-                    ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                    updateReferenceInParent(workspace.getWorkspaceID(), currentArchiveUri, null, parentNode.getWorkspaceURL(), parentDocument, null);
+                    URI nodeOldUri = currentNode.getWorkspaceURL() != null ? URI.create(currentNode.getWorkspaceURL().toString()) : currentArchiveUri;
+                    ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode, parentNode.getWorkspaceURL());
+                    updateReferenceInParent(workspace.getWorkspaceID(), nodeOldUri, null, parentNode.getWorkspaceURL(), parentDocument, null);
                 }
                 
                 return;
@@ -160,51 +169,83 @@ public class UnlinkedNodeExporter implements NodeExporter{
                 workspaceTreeExporter.explore(workspace, currentNode, CorpusStructureBridge.IGNORE_CORPUS_PATH, keepUnlinkedFiles, submissionType, exportPhase);
             }
 
-            URL orphanedNodeURL = versioningHandler.moveFileToOrphansFolder(workspace, currentNode);
-            URI nodeUri = URI.create(orphanedNodeURL.toString());
+            URL orphanedNodeURL = null;
+            URI nodeUri = null;
+            
+            URI nodeOldUri = null;
+            File nodeOldFile = null;  
+            
+            if (currentNode.getWorkspaceURL() != null) {
+            	nodeOldUri = URI.create(currentNode.getWorkspaceURL().toString());
+            	nodeOldFile = new File(currentNode.getWorkspaceURL().getPath());
+            } else {
+            	nodeOldUri = currentArchiveUri;
+            	nodeOldFile = new File(currentNode.getArchiveURL().getPath());
+            }
+            
+            if(currentArchiveUri != null && !archiveFileLocationProvider.isFileInOrphansDirectory(nodeOldFile)) {
+           	    
+            	//create a copy of workspace instance in orphans folder
+            	orphanedNodeURL = versioningHandler.moveOrCopyFileToOrphansFolder(workspace, currentNode, true);
+                 
+            	//move archive instance to trash (deletes ws instance)
+                URL trashedNodeArchiveURL = moveNodeToTrashcan(currentNode);
+                URI trashedNodeArchiveUri = URI.create(trashedNodeArchiveURL.toString());
                 
-            if(currentArchiveUri != null) {
-
-                try {
-                    archiveHandleHelper.deleteArchiveHandleFromServerAndFile(currentNode, orphanedNodeURL);
-                } catch (HandleException | IOException | TransformerException | MetadataException ex) {
-                    logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL(), ex);
+                if(parentNode != null) {                  
+                    ReferencingMetadataDocument parentDocument = null;
+                    
+                    //update parent archive instance with references for trash copy 
+                    parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode, parentNode.getArchiveURL());
+                    updateReferenceInParent(workspace.getWorkspaceID(), nodeOldUri, trashedNodeArchiveUri, parentNode.getArchiveURL(), parentDocument, currentArchiveUri.toString());
+                    
+                    //update parent ws instance with references for orphans copy
+                    nodeUri = URI.create(orphanedNodeURL.toString());
+                    parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode, parentNode.getWorkspaceURL());
+	                updateReferenceInParent(workspace.getWorkspaceID(), nodeOldUri, nodeUri, parentNode.getWorkspaceURL(), parentDocument, FilenameUtils.getName(orphanedNodeURL.toString()));
                 }
-            }
-
-            if(parentNode != null) {
-                URI nodeWsUri = URI.create(currentNode.getWorkspaceURL().toString());
-                ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode);
-                updateReferenceInParent(workspace.getWorkspaceID(), nodeWsUri, nodeUri, parentNode.getWorkspaceURL(), parentDocument, FilenameUtils.getName(orphanedNodeURL.toString()));
-            }
-            
-            //this will be used later for adjusting file permissions
-            currentNode.setWorkspaceURL(orphanedNodeURL);
-            workspaceDao.updateNodeWorkspaceURL(currentNode);
-            
-            if(currentArchiveUri != null) {
+                
+                logger.debug("Node " + currentArchiveUri + " not to be kept, but moved to the trashcan.");
+                
+                updateHandleLocation(workspace.getWorkspaceID(), currentNode);
+                
+                //this will be used later for adjusting file permissions
+                currentNode.setWorkspaceURL(orphanedNodeURL);
+                workspaceDao.updateNodeWorkspaceURL(currentNode);
+                
                 //use mock URL, since the node has been moved to the orphans folder
-                    // there might be, later on, a file in the exact same spot, which would clash with this one in the corpusstructure database
-                URL mockArchiveURL = getMockArchiveURL(currentNode);
-                currentNode.setArchiveURL(mockArchiveURL);
+                //there might be, later on, a file in the exact same spot, which would clash with this one in the corpusstructure database
+                currentNode.setArchiveURL(trashedNodeArchiveURL);
                 workspaceDao.updateNodeArchiveUrl(currentNode);
-
+                
                 workspaceDao.setWorkspaceNodeAsDeleted(workspace.getWorkspaceID(), currentNode.getWorkspaceNodeID(), currentNode.isExternal());
+
+            } else {
+            	orphanedNodeURL = versioningHandler.moveOrCopyFileToOrphansFolder(workspace, currentNode, currentArchiveUri != null ? true : false);
+            	nodeUri = URI.create(orphanedNodeURL.toString());
+            	
+	            if(parentNode != null) {
+	                URI nodeWsUri = URI.create(currentNode.getWorkspaceURL().toString());
+	                ReferencingMetadataDocument parentDocument = retrieveReferencingMetadataDocument(workspace.getWorkspaceID(), parentNode, parentNode.getWorkspaceURL());
+	                updateReferenceInParent(workspace.getWorkspaceID(), nodeWsUri, nodeUri, parentNode.getWorkspaceURL(), parentDocument, FilenameUtils.getName(orphanedNodeURL.toString()));
+	            }
+	            currentNode.setWorkspaceURL(orphanedNodeURL);
+	            workspaceDao.updateNodeWorkspaceURL(currentNode);
             }
         }
     }
     
     
-    private MetadataDocument retrieveMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
+    private MetadataDocument retrieveMetadataDocument(int workspaceID, WorkspaceNode node, URL nodeLocationURL) throws WorkspaceExportException {
         
         MetadataDocument document = null;
         
         if(nodeUtil.isNodeMetadata(node)) {
             try {
-                document = metadataAPI.getMetadataDocument(node.getWorkspaceURL());
+                document = metadataAPI.getMetadataDocument(nodeLocationURL);
                 
             } catch (IOException | MetadataException ex) {
-                String errorMessage = "Error getting Metadata Document for node " + node.getWorkspaceURL();
+                String errorMessage = "Error getting Metadata Document for node " + nodeLocationURL;
                 throwWorkspaceExportException(workspaceID, errorMessage, ex);
             }
         }
@@ -212,14 +253,14 @@ public class UnlinkedNodeExporter implements NodeExporter{
         return document;
     }
     
-    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(int workspaceID, WorkspaceNode node) throws WorkspaceExportException {
+    private ReferencingMetadataDocument retrieveReferencingMetadataDocument(int workspaceID, WorkspaceNode node, URL nodeLocationURL) throws WorkspaceExportException {
         
-        MetadataDocument document = retrieveMetadataDocument(workspaceID, node);
+        MetadataDocument document = retrieveMetadataDocument(workspaceID, node, nodeLocationURL);
         ReferencingMetadataDocument referencingParentDocument = null;
         if(document instanceof ReferencingMetadataDocument) {
             referencingParentDocument = (ReferencingMetadataDocument) document;
         } else {
-            String errorMessage = "Error retrieving child reference in file " + node.getWorkspaceURL();
+            String errorMessage = "Error retrieving child reference in file " + nodeLocationURL;
             throwWorkspaceExportException(workspaceID, errorMessage, null);
         }
         
@@ -234,6 +275,11 @@ public class UnlinkedNodeExporter implements NodeExporter{
             
             if (currentReference == null) {
                 currentReference = metadataApiBridge.getDocumentReferenceByDoubleCheckingURI((CMDIDocument) referencingParentDocument, currentNodeOldUri);
+            }
+            if (currentReference == null) {
+            	logger.error("Reference to: " + currentNodeOldUri + " not found in parent document: " + parentLocation + ". Referencing parent "
+            			+ "document location: " + referencingParentDocument.getFileLocation());
+            	return;
             }
 
             if(filename == null) {
@@ -251,8 +297,6 @@ public class UnlinkedNodeExporter implements NodeExporter{
         }
     }
     
-    
-    
     private URL moveNodeToTrashcan(WorkspaceNode currentNode) {
         
         URL targetArchiveURL = this.versioningHandler.moveFileToTrashCanFolder(currentNode);
@@ -266,28 +310,24 @@ public class UnlinkedNodeExporter implements NodeExporter{
         return targetArchiveURL;
     }
     
-    private void updateHandleLocation(WorkspaceNode currentNode) throws WorkspaceExportException {
+    private void updateHandleLocation(int workspaceID, WorkspaceNode currentNode) throws WorkspaceExportException {
         
+        URI newTargetUri = null;
         try {
-            archiveHandleHelper.deleteArchiveHandleFromServerAndFile(currentNode, currentNode.getArchiveURL());
-        } catch (HandleException | IOException | TransformerException | MetadataException ex) {
-            logger.warn("There was a problem while deleting the handle for node " + currentNode.getArchiveURL());
+             newTargetUri = archiveFileLocationProvider.getUriWithHttpsRoot(currentNode.getArchiveURL().toURI());
+        } catch (URISyntaxException ex) {
+            String errorMessage = "Error getting new target URI for node " + currentNode.getArchiveURL();
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
+        }
+        try {
+            handleManager.updateHandle(new File(currentNode.getArchiveURL().getPath()),
+                    URI.create(currentNode.getArchiveURI().getSchemeSpecificPart()), newTargetUri);
+        
+        } catch (HandleException | IOException ex) {
+            String errorMessage = "Error updating handle for node " + currentNode.getArchiveURL();
+            throwWorkspaceExportException(workspaceID, errorMessage, ex);
         }
     }
-    
-    private URL getMockArchiveURL(WorkspaceNode currentNode) {
-        
-        String urlCompletePath = currentNode.getWorkspaceURL().getPath();
-        String pathToUse = FilenameUtils.getFullPathNoEndSeparator(urlCompletePath);
-        String filename = currentNode.getWorkspaceNodeID() + "_" + FilenameUtils.getName(urlCompletePath);
-        
-        try {
-            return new File(pathToUse, filename).toURI().toURL();
-        } catch (MalformedURLException ex) {
-            return null;
-        }
-    }
-    
     
     private void throwWorkspaceExportException(int workspaceID, String errorMessage, Exception cause) throws WorkspaceExportException {
         logger.error(errorMessage, cause);

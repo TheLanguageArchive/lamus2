@@ -50,4 +50,14 @@ public interface VersioningHandler {
      * @return URL of the node after being moved
      */
     public URL moveFileToOrphansFolder(Workspace workspace, WorkspaceNode nodeToMove);
+    
+    /**
+     * Moves or copies the given node to the corresponding orphans folder.
+     * @param workspace Workspace to which the node belongs
+     * @param targetNode Node to be moved or copied
+     * @param copy true for copy, false for move
+     * @return URL of the node after being moved or copied
+     */
+    public URL moveOrCopyFileToOrphansFolder(Workspace workspace, WorkspaceNode targetNode, boolean copy);
+    
 }

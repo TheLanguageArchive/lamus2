@@ -94,7 +94,15 @@ public class LamusVersioningHandler implements VersioningHandler {
     @Override
     public URL moveFileToOrphansFolder(Workspace workspace, WorkspaceNode nodeToMove) {
         
-        
+    	return moveOrCopyFileToOrphansFolder(workspace, nodeToMove, false);
+    }
+    
+    /**
+     * @see VersioningHandler#moveOrCopyFileToOrphansFolder(nl.mpi.lamus.workspace.model.Workspace, nl.mpi.lamus.workspace.model.WorkspaceNode)
+     */
+    @Override
+    public URL moveOrCopyFileToOrphansFolder(Workspace workspace, WorkspaceNode nodeToMove, boolean copy) {
+
         File orphanOldLocation = null;
         
         File archiveLocation = null;
@@ -143,25 +151,29 @@ public class LamusVersioningHandler implements VersioningHandler {
         }
         
         try {
-            FileUtils.moveFile(orphanOldLocation, orphanNewLocation);
-            if(archiveLocation != null) {
-                Files.deleteIfExists(archiveLocation.toPath());
-            }
+        	if (!copy) {
+                FileUtils.moveFile(orphanOldLocation, orphanNewLocation);
+                if(archiveLocation != null) {
+                    Files.deleteIfExists(archiveLocation.toPath());
+                }
+        	} else {
+                FileUtils.copyFile(orphanOldLocation, orphanNewLocation);
+        	}
+
         } catch (IOException ex) {
-            logger.error("File couldn't be moved from [" + orphanOldLocation + "] to [" + orphanNewLocation + "]", ex);
+            logger.error("File couldn't be " + (copy ? "copied" : "moved") + " from [" + orphanOldLocation + "] to [" + orphanNewLocation + "]", ex);
             return null;
         }
         
-        URL movedFileUrl = null;
+        URL newFileUrl = null;
         try {
-            movedFileUrl = orphanNewLocation.toURI().toURL();
+        	newFileUrl = orphanNewLocation.toURI().toURL();
         } catch (MalformedURLException ex) {
-            logger.warn("Moved file location is not a URL", ex);
+            logger.warn((copy ? "Copied" : "Moved") + " file location is not a URL", ex);
         }
         
-        return movedFileUrl;
+        return newFileUrl;
     }
-    
     
     private URL moveFileTo(WorkspaceNode nodeToMove, boolean toDelete) {
         
