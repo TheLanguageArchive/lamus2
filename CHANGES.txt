@@ -1,4 +1,19 @@
-lamus2-1.6.1 (2016-02-26)
+lamus2-1.6.2 (2016-11-26)
+	Changes:
+		- Unlinking existing nodes now always moves them to the trash can and keeps them accessible via their old handle.
+		- Set "save unlinked resources" checkbox to false by default.
+		- Default starting index for renaming files due to name clash, changed to 1.
+
+	Fixes:
+		- "Save unlinked files" functionality.
+		- Destination (path) for newly ingested objects in existing nodes.
+		- Null pointer exception when filtering workspaces list on: 'Top node URI' or 'Top node URL'.
+		- Null pointer exception when logging out from an open workspace.
+		- Linking an archive existing resource to a newly linked session.
+		- AMS failing to recalculate rights when called with two top nodes and one is descendant of the other.
+		- Override of files in the workspace when more than one file with the same name is imported from the archive. (creating workspace)
+
+lamus2-1.6.1 (2016-09-23)
 
     Changes:
         - Introduced CMDI validation upon submission in the archive.
