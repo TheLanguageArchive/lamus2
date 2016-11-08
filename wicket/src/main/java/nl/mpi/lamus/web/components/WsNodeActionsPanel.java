@@ -68,12 +68,10 @@ public class WsNodeActionsPanel extends FeedbackPanelAwarePanel<Collection<Works
     private Collection<WorkspaceTreeNode> selectedUnlinkedNodes;
 
     public WsNodeActionsPanel(String id, IModel<Collection<WorkspaceTreeNode>> model, FeedbackPanel feedbackPanel) {
-	super(id, model, feedbackPanel);
-	form = new Form<>("wsNodeActionsForm", model);
-        
+    	super(id, model, feedbackPanel);
+    	form = new Form<>("wsNodeActionsForm", model);
         form.add(createListView(nodeActionsProvider.getActions(model.getObject())));
-        
-	add(form);
+        add(form);
     }
 
     /**
