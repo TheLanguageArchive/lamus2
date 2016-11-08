@@ -88,10 +88,10 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             throws WorkspaceExportException {
 
         if (workspace == null) {
-	    String errorMessage = "Workspace not set";
-	    logger.error(errorMessage);
+        	String errorMessage = "Workspace not set";
+        	logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
-	}
+        }
         
         if(WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus()) &&
                 WorkspaceSubmissionType.DELETE_WORKSPACE.equals(submissionType)) {
@@ -112,6 +112,12 @@ public class ReplacedOrDeletedNodeExporter implements NodeExporter {
             String errorMessage = "This exporter (for nodes with status " + currentNode.getStatus().name() + ") should only be used when exporting unlinked nodes, not for the tree";
             logger.error(errorMessage);
             throw new IllegalArgumentException(errorMessage);
+        }
+        
+        if (currentNode.getArchiveURI() != null && currentNode.getArchiveURI().equals(workspace.getTopNodeArchiveURI()) &&
+        		WorkspaceNodeStatus.REPLACED.equals(currentNode.getStatus())) {
+            logger.debug("Node " + currentNode.getWorkspaceNodeID() + " is the top node of workspace: " + workspace.getWorkspaceID() + " and cannot be replaced");
+            return;
         }
         
         int workspaceID = workspace.getWorkspaceID();

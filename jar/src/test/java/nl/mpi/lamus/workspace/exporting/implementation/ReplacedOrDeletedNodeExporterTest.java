@@ -209,6 +209,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -258,6 +259,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -300,6 +302,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(null));
             
             //logger
             exactly(2).of(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -331,7 +334,7 @@ public class ReplacedOrDeletedNodeExporterTest {
             oneOf(mockChildWsNode).isExternal(); will(returnValue(Boolean.FALSE));
             
             //node without archiveURL - was never in the archive, so it can just be skipped and will eventually be deleted together with the whole workspace folder
-            oneOf(mockChildWsNode).getArchiveURI(); will(returnValue(null));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(null));
         }});
         
         replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
@@ -354,6 +357,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -391,6 +395,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -440,6 +445,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -470,6 +476,32 @@ public class ReplacedOrDeletedNodeExporterTest {
     }
     
     @Test
+    public void exportReplacedMetadataNodeWithArchiveURI_TopNode() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
+        
+        final int testWorkspaceNodeID = 10;
+        final URI testNodeArchiveURI = new URI("hdl:" + UUID.randomUUID().toString());
+        final WorkspaceNodeStatus testNodeStatus = WorkspaceNodeStatus.REPLACED;
+        final String parentCorpusNamePathToClosestTopNode = CorpusStructureBridge.IGNORE_CORPUS_PATH;
+        final boolean keepUnlinkedFiles = Boolean.FALSE; //not used in this exporter
+        final WorkspaceSubmissionType submissionType = WorkspaceSubmissionType.SUBMIT_WORKSPACE;
+        final WorkspaceExportPhase exportPhase = WorkspaceExportPhase.TREE_EXPORT;
+        
+        testWorkspace.setTopNodeArchiveURI(testNodeArchiveURI);
+        
+        context.checking(new Expectations() {{
+            
+            allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
+            
+            //logger
+            oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));            
+        }});
+        
+        replacedOrDeletedNodeExporter.exportNode(testWorkspace, null, parentCorpusNamePathToClosestTopNode, mockChildWsNode, keepUnlinkedFiles, submissionType, exportPhase);
+        testWorkspace.setTopNodeArchiveURI(null);
+    }
+    
+    @Test
     public void exportNodeWithDifferentStatus() throws MalformedURLException, URISyntaxException, WorkspaceExportException, WorkspaceNodeNotFoundException, HandleException, IOException {
         
         final int testWorkspaceNodeID = 10;
@@ -486,6 +518,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -534,6 +567,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
@@ -597,6 +631,7 @@ public class ReplacedOrDeletedNodeExporterTest {
         context.checking(new Expectations() {{
             
             allowing(mockChildWsNode).getStatus(); will(returnValue(testNodeStatus));
+            exactly(2).of(mockChildWsNode).getArchiveURI(); will(returnValue(testNodeArchiveURI));
             
             //logger
             oneOf(mockChildWsNode).getWorkspaceNodeID(); will(returnValue(testWorkspaceNodeID));
