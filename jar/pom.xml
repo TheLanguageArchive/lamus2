@@ -255,7 +255,7 @@
         <dependency>
             <groupId>nl.mpi.annot</groupId>
             <artifactId>annot-tools</artifactId>
-            <version>1.1.14</version>
+            <version>1.1.16</version>
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>
