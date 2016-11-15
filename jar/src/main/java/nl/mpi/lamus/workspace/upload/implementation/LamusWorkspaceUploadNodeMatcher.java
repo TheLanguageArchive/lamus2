@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import nl.mpi.archiving.corpusstructure.core.CorpusNode;
 import nl.mpi.archiving.corpusstructure.core.service.NodeResolver;
@@ -113,7 +114,18 @@ public class LamusWorkspaceUploadNodeMatcher implements WorkspaceUploadNodeMatch
             logger.debug("One match in workspace for URI " + handle);
             return matchingNodes.iterator().next();
         } else if(matchingNodes.size() > 1) { // several matches - problem
-            String message = "Several matches found in workspace for URI " + handle;
+        	StringBuilder sb = new StringBuilder("Several workspace matches found for URI: ");
+        	sb.append(handle);
+            Iterator<WorkspaceNode> it = matchingNodes.iterator();
+            while(it.hasNext()) {
+            	WorkspaceNode node = it.next();
+            	sb.append(System.lineSeparator());
+            	sb.append("Workspace URL: ");
+            	sb.append(node.getWorkspaceURL());
+            	sb.append(" Archive URL: ");
+            	sb.append(node.getArchiveURL());
+            }
+            String message = sb.toString();
             logger.error(message);
             throw new IllegalStateException(message);
         }

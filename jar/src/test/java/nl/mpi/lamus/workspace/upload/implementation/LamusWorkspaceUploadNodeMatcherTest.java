@@ -36,7 +36,6 @@ import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.metadata.api.model.Reference;
 import org.jmock.Expectations;
-import static org.jmock.Expectations.returnValue;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -206,7 +205,23 @@ public class LamusWorkspaceUploadNodeMatcherTest {
         matchesInWorkspace.add(mockSomeOtherNode);
         matchesInWorkspace.add(mockYetAnotherNode);
         
-        final String expectedExceptionMessage = "Several matches found in workspace for URI " + handleToMatch;
+        final URL someOtherNodeWSuRL= new URL("file:/dummy/ws/url1");
+        final URL someOtherNodeArchURL= new URL("file:/dummy/arch/url1");
+        final URL yetAnotherNodeWSuRL= new URL("file:/dummy/ws/url2");
+        final URL yetAnotherNodeArchURL= new URL("file:/dummy/arch/url2");
+        
+        StringBuilder expectedExceptionMessage = new StringBuilder("Several workspace matches found for URI: ");
+        expectedExceptionMessage.append(handleToMatch);
+        expectedExceptionMessage.append(System.lineSeparator());
+        expectedExceptionMessage.append("Workspace URL: ");
+        expectedExceptionMessage.append(someOtherNodeWSuRL);
+        expectedExceptionMessage.append(" Archive URL: ");
+        expectedExceptionMessage.append(someOtherNodeArchURL);
+        expectedExceptionMessage.append(System.lineSeparator());
+        expectedExceptionMessage.append("Workspace URL: ");
+        expectedExceptionMessage.append(yetAnotherNodeWSuRL);
+        expectedExceptionMessage.append(" Archive URL: ");
+        expectedExceptionMessage.append(yetAnotherNodeArchURL);
         
         context.checking(new Expectations() {{
             
@@ -225,13 +240,17 @@ public class LamusWorkspaceUploadNodeMatcherTest {
             //  and create an external node pointing to the matched corpus node
             oneOf(mockNodeUtil).isNodeMetadata(mockSecondNode); will(returnValue(Boolean.FALSE));
             oneOf(mockWorkspaceDao).getWorkspaceNodeByArchiveURI(handleToMatch); will(returnValue(matchesInWorkspace));
+            oneOf(mockSomeOtherNode).getWorkspaceURL(); will(returnValue(someOtherNodeWSuRL));
+            oneOf(mockSomeOtherNode).getArchiveURL(); will(returnValue(someOtherNodeArchURL));
+            oneOf(mockYetAnotherNode).getWorkspaceURL(); will(returnValue(yetAnotherNodeWSuRL));
+            oneOf(mockYetAnotherNode).getArchiveURL(); will(returnValue(yetAnotherNodeArchURL));
         }});
         
         try {
             workspaceUploadNodeMatcher.findNodeForHandle(mockWorkspace, nodesToCheck, handleToMatch);
             fail("should have thrown exception");
         } catch(IllegalStateException ex) {
-            assertEquals(expectedExceptionMessage, ex.getMessage());
+            assertEquals(expectedExceptionMessage.toString(), ex.getMessage());
         }
     }
     
