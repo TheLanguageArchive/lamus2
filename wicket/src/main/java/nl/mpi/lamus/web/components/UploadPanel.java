@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipInputStream;
+import nl.mpi.lamus.archive.implementation.LamusArchiveFileHelper;
 import nl.mpi.lamus.exception.DisallowedPathException;
 import nl.mpi.lamus.exception.WorkspaceException;
 import nl.mpi.lamus.service.WorkspaceService;
@@ -111,6 +112,9 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
 
                             if (newFile.isDirectory()) {
                                 continue;
+                            } else {
+                            	LamusArchiveFileHelper lah = new LamusArchiveFileHelper();
+                            	newFile = lah.getFinalFile(uploadDirectory, upload.getClientFileName());
                             }
 
                             if (newFile.getName().endsWith(".zip")) {
@@ -150,7 +154,7 @@ public class UploadPanel extends FeedbackPanelAwarePanel<Workspace> {
                             }
                         }
                         
-                        if(copiedFiles.isEmpty()) {
+                        if(copiedFiles.isEmpty() && uploadProblems.isEmpty()) {
                             UploadPanel.this.info(getLocalizer().getString("upload_panel_no_files", this));
                             return;
                         }
