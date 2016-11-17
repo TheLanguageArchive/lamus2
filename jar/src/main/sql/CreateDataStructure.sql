@@ -1,42 +1,42 @@
 CREATE TABLE workspace (
 	workspace_id                SERIAL                          NOT NULL,
-	user_id                     varchar(30)                     NOT NULL,
+	user_id                     varchar                         NOT NULL,
 	top_node_id                 integer,
-        top_node_archive_uri        varchar(255),
-        top_node_archive_url        varchar(255),
+    top_node_archive_uri        varchar,
+    top_node_archive_url        varchar,
 	start_date                  timestamp(6) with time zone     NOT NULL,
 	end_date                    timestamp(6) with time zone,
 	session_start_date          timestamp(6) with time zone     NOT NULL,
 	session_end_date            timestamp(6) with time zone,
 	used_storage_space          bigint,
 	max_storage_space           bigint,
-	status                      varchar(255)                    NOT NULL,
-        message                     varchar(255)                    NOT NULL,
-        crawler_id                  varchar(255),
+	status                      varchar                    NOT NULL,
+    message                     varchar                    NOT NULL,
+    crawler_id                  varchar,
 	PRIMARY KEY (workspace_id));
 
 CREATE TABLE pre_lock (
-        archive_uri                 varchar(255),
+        archive_uri                 varchar,
         PRIMARY KEY (archive_uri));
 	
 CREATE TABLE node (
 	workspace_node_id           SERIAL                          NOT NULL,
 	workspace_id                integer                         NOT NULL,
-	profile_schema_uri          varchar(255),
-	name                        varchar(255)                    NOT NULL,
-	title                       varchar(255),
-        type                        varchar(255)                    NOT NULL,
-	workspace_url               varchar(255),
-	archive_uri                 varchar(255),
-        archive_url                 varchar(255),
-	origin_url                  varchar(255),
-	status                      varchar(255)                    NOT NULL,
-        protected                   boolean                         NOT NULL,
-	format                      varchar(255),
+	profile_schema_uri          varchar,
+	name                        varchar                    NOT NULL,
+	title                       varchar,
+    type                        varchar                    NOT NULL,
+	workspace_url               varchar,
+	archive_uri                 varchar,
+    archive_url                 varchar,
+	origin_url                  varchar,
+	status                      varchar                    NOT NULL,
+    protected                   boolean                         NOT NULL,
+	format                      varchar,
 	PRIMARY KEY (workspace_node_id));
 
 CREATE TABLE node_lock (
-        archive_uri                 varchar(255),
+        archive_uri                 varchar,
         workspace_id                integer                         NOT NULL,
         PRIMARY KEY (archive_uri));
 	
