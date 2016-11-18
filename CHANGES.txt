@@ -1,4 +1,4 @@
-lamus2-1.6.2 (2016-11-26)
+lamus2-1.6.2 (2016-11-18)
 	Changes:
 		- Unlinking existing nodes now always moves them to the trash can and keeps them accessible via their old handle.
 		- Set "save unlinked resources" checkbox to false by default.
@@ -12,6 +12,9 @@ lamus2-1.6.2 (2016-11-26)
 		- Linking an archive existing resource to a newly linked session.
 		- AMS failing to recalculate rights when called with two top nodes and one is descendant of the other.
 		- Override of files in the workspace when more than one file with the same name is imported from the archive. (creating workspace)
+		- Impossibility to upload two files with the same name.
+		- Error reporting when no file is uploaded successfully.
+		- Failing to remove CMDI matching component of resource proxies when resources are not found.
 
 lamus2-1.6.1 (2016-09-23)
 

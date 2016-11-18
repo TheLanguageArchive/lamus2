@@ -43,6 +43,7 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeLink;
@@ -91,6 +92,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
     @Mock MetadataAPI mockMetadataAPI;
     @Mock MetadataApiBridge mockMetadataApiBridge;
     @Mock WorkspaceFileHandler mockWorkspaceFileHandler;
+    @Mock NodeUtil mockNodeUtil;
     
     @Mock WorkspaceDirectoryHandler mockWorkspaceDirectoryHandler;
     @Mock ArchiveFileLocationProvider mockArchiveFileLocationProvider;
@@ -135,7 +137,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         workspaceUploadReferenceHandler = new LamusWorkspaceUploadReferenceHandler(
                 mockWorkspaceUploadNodeMatcher,
                 mockWorkspaceDao, mockWorkspaceNodeLinkManager, mockHandleParser,
-                mockMetadataAPI, mockMetadataApiBridge, mockWorkspaceFileHandler);
+                mockMetadataAPI, mockMetadataApiBridge, mockWorkspaceFileHandler, mockNodeUtil);
         ReflectionTestUtils.setField(workspaceUploadReferenceHandler, "workspaceDirectoryHandler", mockWorkspaceDirectoryHandler);
         ReflectionTestUtils.setField(workspaceUploadReferenceHandler, "archiveFileLocationProvider", mockArchiveFileLocationProvider);
         baseDirectory = testFolder.newFolder("temp_directory");
@@ -791,6 +793,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithoutLocalUri_MatchesNode(mockFirstReference, mockExternalNode, Boolean.TRUE, Boolean.FALSE, firstRefURI, completeFirstRefURI, nodesToCheck, mockWorkspace, expectedException);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
+        removeComponent();
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
@@ -1037,6 +1040,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation,
                 firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
+        removeComponent();
         
         
         Collection<ImportProblem> failedLinks =
@@ -1080,7 +1084,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithoutMatch(mockFirstReference, Boolean.TRUE, firstRefURI, nodesToCheck, mockWorkspace);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, firstDocumentLocation, firstDocumentLocationFile, mockFirstReference, firstRefURI, null);
-        
+        removeComponent();
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
@@ -1122,7 +1126,7 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
         reference_WithoutMatch(mockFirstReference, Boolean.FALSE, firstRefURI, nodesToCheck, mockWorkspace);
         
         removeReference(mockMetadataDocument, mockFirstNode, firstNodeID, null, null, mockFirstReference, firstRefURI, expectedException);
-        
+        removeComponent();
         
         Collection<ImportProblem> failedLinks =
                 workspaceUploadReferenceHandler.matchReferencesWithNodes(
@@ -1152,6 +1156,14 @@ public class LamusWorkspaceUploadReferenceHandlerTest {
             }
             
             oneOf(mockDocument).getDocumentReferences(); will(returnValue(references));
+        }});
+    }
+    
+    private void removeComponent() {
+        context.checking(new Expectations() {{
+            oneOf(mockMetadataDocument).getMetadataDocument();
+            oneOf(mockFirstReference).getLocation();
+            allowing(mockFirstNode).getWorkspaceNodeID();
         }});
     }
     

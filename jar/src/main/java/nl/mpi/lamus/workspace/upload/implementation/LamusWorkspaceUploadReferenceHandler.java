@@ -40,6 +40,7 @@ import nl.mpi.lamus.filesystem.WorkspaceDirectoryHandler;
 import nl.mpi.lamus.filesystem.WorkspaceFileHandler;
 import nl.mpi.lamus.metadata.MetadataApiBridge;
 import nl.mpi.lamus.workspace.management.WorkspaceNodeLinkManager;
+import nl.mpi.lamus.workspace.model.NodeUtil;
 import nl.mpi.lamus.workspace.model.Workspace;
 import nl.mpi.lamus.workspace.model.WorkspaceNode;
 import nl.mpi.lamus.workspace.model.WorkspaceNodeType;
@@ -50,6 +51,8 @@ import nl.mpi.metadata.api.MetadataException;
 import nl.mpi.metadata.api.model.MetadataDocument;
 import nl.mpi.metadata.api.model.Reference;
 import nl.mpi.metadata.api.model.ReferencingMetadataDocument;
+import nl.mpi.metadata.cmdi.api.model.CMDIDocument;
+import nl.mpi.metadata.cmdi.api.model.ResourceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +75,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
     private final MetadataAPI metadataAPI;
     private final MetadataApiBridge metadataApiBridge;
     private final WorkspaceFileHandler workspaceFileHandler;
+    private final NodeUtil nodeUtil;
     
     @Autowired
     private WorkspaceDirectoryHandler workspaceDirectoryHandler;
@@ -84,7 +88,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             WorkspaceUploadNodeMatcher wsUploadNodeMatcher,
             WorkspaceDao wsDao, WorkspaceNodeLinkManager wsNodeLinkManager,
             HandleParser handleParser, MetadataAPI mdAPI,
-            MetadataApiBridge mdApiBridge, WorkspaceFileHandler wsFileHandler) {
+            MetadataApiBridge mdApiBridge, WorkspaceFileHandler wsFileHandler, NodeUtil nodeUtil) {
         this.workspaceUploadNodeMatcher = wsUploadNodeMatcher;
         this.workspaceDao = wsDao;
         this.workspaceNodeLinkManager = wsNodeLinkManager;
@@ -92,6 +96,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
         this.metadataAPI = mdAPI;
         this.metadataApiBridge = mdApiBridge;
         this.workspaceFileHandler = wsFileHandler;
+        this.nodeUtil = nodeUtil;
     }
     
     /**
@@ -193,6 +198,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                     try {
                         matchedNode = workspaceUploadNodeMatcher.findNodeForHandle(workspace, nodesToCheck, preparedHandle);
                     } catch(IllegalStateException ex) {
+                    	removeMatchingComponent(currentDocument, currentNode, ref);
                         removeReference(currentDocument, ref, currentNode);
                         logger.error(ex.getMessage());
                         failedLinks.add(new MatchImportProblem(currentNode, ref, ex.getMessage(), null));
@@ -275,6 +281,7 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
                 }
                 
             } else {
+            	removeMatchingComponent(currentDocument, currentNode, ref);            	
                 removeReference(currentDocument, ref, currentNode);
                 String fileLocation = currentDocument.getFileLocation().toString();
                 String message = "Reference (" + ref.getURI() + ") in node " + currentNode.getWorkspaceNodeID() + " not matched. "
@@ -310,6 +317,56 @@ public class LamusWorkspaceUploadReferenceHandler implements WorkspaceUploadRefe
             metadataAPI.writeMetadataDocument(document, documentStreamResult);
         } catch (MetadataException | IOException | TransformerException ex) {
             logger.error("Error removing reference '" + ref.getURI() + "' from node " + currentNode.getWorkspaceNodeID(), ex);
+        }
+    }
+    
+    private void removeMatchingComponent(ReferencingMetadataDocument currentDocument, WorkspaceNode currentNode, Reference ref) {
+        CMDIDocument cmdiDocument = null;
+        if(currentDocument.getMetadataDocument() instanceof CMDIDocument) {
+        	cmdiDocument = (CMDIDocument) currentDocument.getMetadataDocument();
+        } else {
+            String errorMessage = "Error retrieving referencing document for node " + currentNode.getWorkspaceNodeID();
+            logger.error(errorMessage);
+        }
+        if(ref instanceof ResourceProxy) {
+            ResourceProxy rProxy = (ResourceProxy) ref;
+            try {
+				removeComponent(currentNode, nodeUtil.convertMimetype(ref.getMimetype()), rProxy, cmdiDocument, metadataApiBridge.isReferenceAnInfoLink(currentDocument, ref));
+			} catch (MetadataException e) {
+				logger.error(e.getMessage());
+			}
+        } else {
+            String errorMessage = "Error retrieving resource proxy for reference " + ref.getLocation();
+            logger.error(errorMessage);
+        }
+    }
+    
+    private void removeComponent(WorkspaceNode parentNode, WorkspaceNodeType childNodeType,
+            ResourceProxy proxyToRemove, CMDIDocument parentDocument, boolean isInfoLink) throws MetadataException {
+        
+        String componentName = getComponentName(
+                proxyToRemove.getMimetype(), parentNode.getProfileSchemaURI(), childNodeType, isInfoLink);
+        if(componentName == null) {
+            return;
+        }
+
+        nl.mpi.metadata.cmdi.api.model.Component component = 
+                metadataApiBridge.getComponent(parentDocument, componentName, proxyToRemove.getId());
+        if(component == null) {
+            return;
+        }
+        
+        metadataApiBridge.removeComponent(component);
+    }
+    
+    private String getComponentName(String mimetype, URI profileSchemaURI,
+            WorkspaceNodeType childNodeType, boolean isInfoLink) {
+        if(mimetype != null) {
+            return metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    profileSchemaURI, mimetype, null, isInfoLink);
+        } else {
+            return metadataApiBridge.getComponentPathForProfileAndReferenceType(
+                    profileSchemaURI, null, childNodeType, isInfoLink);
         }
     }
     
