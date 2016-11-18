@@ -1,3 +1,9 @@
+lamus2-1.6.3 (20XX-XX-XX)
+	Changes:
+
+	Fixes:
+
+
 lamus2-1.6.2 (2016-11-18)
 	Changes:
 		- Unlinking existing nodes now always moves them to the trash can and keeps them accessible via their old handle.
